@@ -53,8 +53,8 @@ jobs:
       # Deploy successful builds on master to Google App Engine
       # https://circleci.com/docs/2.0/google-container-engine/
       - run:
-        name: Decode Google Cloud Credentials
-        command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
+          name: Decode Google Cloud Credentials
+          command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
 
       # https://circleci.com/docs/2.0/deployment_integrations/
       - deploy:
