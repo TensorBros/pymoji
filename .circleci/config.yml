@@ -15,7 +15,7 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/postgres:9.4
 
-    working_directory: ~/ponies
+    working_directory: ~/pymoji
     steps:
       - checkout
 
@@ -43,8 +43,11 @@ jobs:
           name: run tests
           command: |
             source venv/bin/activate
-            python -m pytest --junitxml=test-reports.xml
+            python -m pytest --junitxml=tmp/test-reports.xml
 
-      # - store_artifacts:
-          # path: $CIRCLE_TEST_RESULTS
+      - store_test_results:
+          path: tmp
+
+      - store_artifacts:
+          path: tmp
 
