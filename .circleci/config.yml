@@ -1,19 +1,19 @@
 # Python CircleCI 2.0 configuration file
 #
-# https://circleci.com/docs/2.0/language-python/
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
 version: 2
 jobs:
   build:
     docker:
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
       - image: circleci/python:2.7.13
 
       # Specify service dependencies here if necessary
-      - image: google/cloud-sdk
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
 
     working_directory: ~/pymoji
     steps:
@@ -38,7 +38,7 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      # Run tests and save results
+      # run tests!
       - run:
           name: run tests
           command: |
@@ -50,22 +50,4 @@ jobs:
 
       - store_artifacts:
           path: tmp
-
-      # Deploy successful builds on master to Google App Engine
-      # https://circleci.com/docs/2.0/google-container-engine/
-      - run:
-        name: Decode Google Cloud Credentials
-        command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
-
-      # https://circleci.com/docs/2.0/deployment_integrations/
-      - deploy:
-          name: Maybe Deploy
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-              gcloud --quiet config set project $GCLOUD_PROJECT_ID
-              gcloud --quiet app deploy --promote
-            fi
-
-
 
