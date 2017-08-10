@@ -17,6 +17,7 @@ brew install coreutils pyenv pyenv-virtualenv
 ```
 - Add required shims to your bash profile:
 ```bash
+# Python shims
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
@@ -26,7 +27,7 @@ eval "$(pyenv virtualenv-init -)"
 ```bash
 brew cask install google-cloud-sdk
 gcloud init
-# TODO add project-specific configuration instructions
+# enter 'pymoji-176318' for project
 ```
 
 ### 🐍 Python Environment
@@ -39,31 +40,30 @@ pyenv install 2.7.13
 - Create new virtual environment
 ```bash
 pyenv virtualenv 2.7.13 pymoji
-echo 'pymoji' > .python-version
 ```
 - Install dependencies
 ```bash
+cd pymoji
+echo 'pymoji' > .python-version
 pip install -r requirements.txt
 ```
 
 
 ## Run Local
 
+- Open a terminal and run the dev server:
 ```bash
+cd pymoji
 python main.py
 ```
 
-Open a browser and navigate to:
-```bash
-http://localhost:8080
-```
+- Open a browser and navigate to http://localhost:8080
 
 
 ## Deploy to Cloud (Manual)
 
 ```bash
-gcloud app deploy
-gcloud app browse
+gcloud app deploy --project pymoji-176318
 ```
 
 
