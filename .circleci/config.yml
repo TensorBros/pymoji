@@ -47,14 +47,12 @@ jobs:
           - v1-dependencies-{{ checksum "requirements.txt" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
-
       - run:
           name: install python dependencies
           command: |
             virtualenv venv
             source venv/bin/activate
             pip install -r requirements.txt
-
       - save_cache:
           paths:
             - ./venv
@@ -66,23 +64,18 @@ jobs:
           command: |
             source venv/bin/activate
             python -m pytest --junitxml=tmp/test-reports.xml
-
       - store_test_results:
           path: tmp
-
       - store_artifacts:
           path: tmp
 
       # Deploy successful builds on master to Google App Engine
       # https://circleci.com/docs/2.0/deployment_integrations/
       - deploy:
-          name: Maybe Deploy
+          name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               ${HOME}/google-cloud-sdk/bin/gcloud --quiet config set project $GCLOUD_PROJECT_ID
               ${HOME}/google-cloud-sdk/bin/gcloud --quiet app deploy --promote
             fi
-
-
-
