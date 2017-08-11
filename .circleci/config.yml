@@ -15,11 +15,10 @@ jobs:
     steps:
       - checkout
 
-      # Install and configure Google Cloud
+      # Install and cache Google Cloud SDK
+      # originally adapted from ideas found here:
       # https://circleci.com/docs/2.0/google-container-engine/
-      - run:
-          name: decode gcloud credentials
-          command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
+      # http://blog.glop.org/2015/10/08/continuous-deployement-with-google-app-engine-and-circleci.html
       - restore_cache:
           keys:
           - google-cloud-sdk-166.0.0
@@ -31,11 +30,6 @@ jobs:
             fi
           environment:
             CLOUDSDK_CORE_DISABLE_PROMPTS: 1
-      - run:
-          name: update gcloud sdk
-          command: |
-            source ~/google-cloud-sdk/path.bash.inc
-            gcloud --quiet components update
       - save_cache:
           paths:
             - ~/google-cloud-sdk
@@ -75,7 +69,9 @@ jobs:
           name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
               source ~/google-cloud-sdk/path.bash.inc
+              gcloud --quiet components update
               gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               gcloud --quiet config set project $GCLOUD_PROJECT_ID
               gcloud --quiet app deploy --promote
