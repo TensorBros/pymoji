@@ -22,23 +22,24 @@ jobs:
           command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
       - restore_cache:
           keys:
-          - google-cloud-sdk
+          - google-cloud-sdk-166.0.0
       - run:
           name: install gcloud sdk
           command: |
-            if [ ! -d ${HOME}/google-cloud-sdk ]; then
+            if [ ! -d ~/google-cloud-sdk ]; then
               curl https://sdk.cloud.google.com | bash
             fi
+            source ~/google-cloud-sdk/path.bash.inc
           environment:
             CLOUDSDK_CORE_DISABLE_PROMPTS: 1
       - run:
           name: update gcloud sdk
           command: |
-            ${HOME}/google-cloud-sdk/bin/gcloud --quiet components update
+            gcloud --quiet components update
       - save_cache:
           paths:
-            - ${HOME}/google-cloud-sdk
-          key: google-cloud-sdk
+            - ~/google-cloud-sdk
+          key: google-cloud-sdk-166.0.0
 
       # Download and cache dependencies
       - restore_cache:
@@ -74,8 +75,8 @@ jobs:
           name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-              ${HOME}/google-cloud-sdk/bin/gcloud --quiet config set project $GCLOUD_PROJECT_ID
-              ${HOME}/google-cloud-sdk/bin/gcloud --quiet app deploy --promote
+              gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+              gcloud --quiet config set project $GCLOUD_PROJECT_ID
+              gcloud --quiet app deploy --promote
             fi
 
