@@ -57,7 +57,7 @@ jobs:
           name: run linters
           command: |
             source venv/bin/activate
-            pylint *.py
+            pylint --disable=C *.py
 
       # Run tests and save results
       - run:
