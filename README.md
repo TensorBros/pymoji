@@ -48,6 +48,26 @@ echo 'pymoji' > .python-version
 pip install -r requirements.txt
 ```
 
+### Git Hooks
+
+- Auomatically run linters before pushing:
+```bash
+cd pymoji
+./git-pre-push.sh
+```
+
+### Sublime
+- http://mathalope.co.uk/2017/05/19/sublime-text-3-how-to-set-different-tab-size-based-on-file-type/
+- Optional: [SublimeLinter](http://sublimelinter.readthedocs.io/en/latest/)
+  - [pylint extension](https://packagecontrol.io/packages/SublimeLinter-pylint)
+  - [eslint extension](https://packagecontrol.io/packages/SublimeLinter-contrib-eslint)
+  - IMPORTANT: because reasons, you must also do some global setup:
+  ```bash
+  pyenv global 2.7.13
+  cd ~ # go somewhere that falls through to global environment
+  pip install pylint
+  ```
+
 
 ## Run Local
 
