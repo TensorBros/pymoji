@@ -23,6 +23,8 @@ jobs:
       - restore_cache:
           keys:
           - google-cloud-sdk-{{ checksum "gcloud.version" }}
+          # fallback to using the latest cache if no exact match is found
+          - google-cloud-sdk-
       - run:
           name: install gcloud sdk
           command: |
@@ -79,3 +81,4 @@ jobs:
               ${HOME}/google-cloud-sdk/bin/gcloud --quiet config set project $GCLOUD_PROJECT_ID
               ${HOME}/google-cloud-sdk/bin/gcloud --quiet app deploy --promote
             fi
+
