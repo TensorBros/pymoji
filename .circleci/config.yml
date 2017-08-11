@@ -22,9 +22,7 @@ jobs:
           command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
       - restore_cache:
           keys:
-          - google-cloud-sdk-{{ checksum "gcloud.version" }}
-          # fallback to using the latest cache if no exact match is found
-          - google-cloud-sdk-
+          - google-cloud-sdk
       - run:
           name: install gcloud sdk
           command: |
@@ -37,11 +35,10 @@ jobs:
           name: update gcloud sdk
           command: |
             ${HOME}/google-cloud-sdk/bin/gcloud --quiet components update
-            ${HOME}/google-cloud-sdk/bin/gcloud --version > gcloud.version
       - save_cache:
           paths:
             - ${HOME}/google-cloud-sdk
-          key: google-cloud-sdk-{{ checksum "gcloud.version" }}
+          key: google-cloud-sdk
 
       # Download and cache dependencies
       - restore_cache:
