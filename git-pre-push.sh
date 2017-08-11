@@ -17,9 +17,7 @@ do
     if [[ $FILE =~ ^.+py$ ]]
     then
         date "+%Y-%m-%d %T      Linting: pylint: ${FILE}"
-        set -e
         pylint --disable=C "${FILE}"
-        set +e
         if [ $? -ne 0 ]
         then
             date "+%Y-%m-%d %T    Aborting push due to files with lint"
@@ -30,9 +28,7 @@ do
     if [[ $FILE =~ ^.+jsx?$ ]]
     then
         date "+%Y-%m-%d %T      Linting: eslint: ${FILE}"
-        set -e
         node_modules/eslint/bin/eslint.js "${FILE}"
-        set +e
         if [ $? -ne 0 ]
         then
             date "+%Y-%m-%d %T    Aborting push due to files with lint"
