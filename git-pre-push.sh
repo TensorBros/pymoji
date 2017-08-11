@@ -1,6 +1,6 @@
 #!/bin/sh
-if [ ! -L .git/hooks/pre-push ]; then
-    ln -s -f ./git-pre-push.sh .git/hooks/pre-push
+if [ ! -f .git/hooks/pre-push ]; then
+    cp ./git-pre-push.sh .git/hooks/pre-push
 fi
 BRANCH=$( git symbolic-ref --short -q HEAD )
 REMOTE=$( git rev-parse --verify "origin/${BRANCH}" )
