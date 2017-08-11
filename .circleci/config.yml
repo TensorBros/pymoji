@@ -66,7 +66,7 @@ jobs:
       - deploy:
           name: Maybe Deploy
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "gcloud-deploy" ]; then
               ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               ${HOME}/google-cloud-sdk/bin/gcloud --quiet config set project $GCLOUD_PROJECT_ID
               ${HOME}/google-cloud-sdk/bin/gcloud --quiet app deploy --promote
