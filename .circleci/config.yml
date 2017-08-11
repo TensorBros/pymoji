@@ -7,11 +7,6 @@ jobs:
     docker:
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
-
-      # Specify service dependencies here if necessary:
-      # https://circleci.com/docs/2.0/google-container-engine/
-      - image: google/cloud-sdk
-
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
       - image: circleci/python:2.7.13
@@ -19,6 +14,20 @@ jobs:
     working_directory: ~/pymoji
     steps:
       - checkout
+
+      # Install and configure Google Cloud
+      # https://circleci.com/docs/2.0/google-container-engine/
+      - run:
+          name: decode gcloud credentials
+          command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
+      - run:
+          name: install gcloud sdk
+          command: |
+            if [ ! -d ${HOME}/google-cloud-sdk ]; then
+              curl https://sdk.cloud.google.com | bash
+            fi
+          environment:
+            CLOUDSDK_CORE_DISABLE_PROMPTS: 1
 
       # Download and cache dependencies
       - restore_cache:
@@ -28,7 +37,7 @@ jobs:
           - v1-dependencies-
 
       - run:
-          name: install dependencies
+          name: install python dependencies
           command: |
             virtualenv venv
             source venv/bin/activate
@@ -53,19 +62,14 @@ jobs:
           path: tmp
 
       # Deploy successful builds on master to Google App Engine
-      # https://circleci.com/docs/2.0/google-container-engine/
-      - run:
-          name: Decode Google Cloud Credentials
-          command: echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
-
       # https://circleci.com/docs/2.0/deployment_integrations/
       - deploy:
           name: Maybe Deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-              gcloud --quiet config set project $GCLOUD_PROJECT_ID
-              gcloud --quiet app deploy --promote
+              ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+              ${HOME}/google-cloud-sdk/bin/gcloud --quiet config set project $GCLOUD_PROJECT_ID
+              ${HOME}/google-cloud-sdk/bin/gcloud --quiet app deploy --promote
             fi
 
 
