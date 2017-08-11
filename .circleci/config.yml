@@ -29,12 +29,12 @@ jobs:
             if [ ! -d ~/google-cloud-sdk ]; then
               curl https://sdk.cloud.google.com | bash
             fi
-            source ~/google-cloud-sdk/path.bash.inc
           environment:
             CLOUDSDK_CORE_DISABLE_PROMPTS: 1
       - run:
           name: update gcloud sdk
           command: |
+            source ~/google-cloud-sdk/path.bash.inc
             gcloud --quiet components update
       - save_cache:
           paths:
@@ -75,6 +75,7 @@ jobs:
           name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              source ~/google-cloud-sdk/path.bash.inc
               gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               gcloud --quiet config set project $GCLOUD_PROJECT_ID
               gcloud --quiet app deploy --promote
