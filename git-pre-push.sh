@@ -16,8 +16,8 @@ do
 
     if [[ $FILE =~ ^.+py$ ]]
     then
-        date "+%Y-%m-%d %T      Linting: pylint: ${FILE}"
-        pylint --disable=C "${FILE}"
+        date "+%Y-%m-%d %T      SKIPPING Linting: pylint: ${FILE}"
+        #pylint --disable=C "${FILE}"
         if [ $? -ne 0 ]
         then
             date "+%Y-%m-%d %T    Aborting push due to files with lint"
