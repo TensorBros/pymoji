@@ -93,10 +93,10 @@ def render_emoji(image, face):
         emoji = sorrow_emoji
     elif face.anger_likelihood > 2:
         emoji = anger_emoji
-    elif face.joy_likelihood > 3:
-        emoji = joy_emoji
     elif face.surprise_likelihood > 3:
         emoji = surprise_emoji
+    elif face.joy_likelihood > 3:
+        emoji = joy_emoji
 
     # hackily render emoji in center of bounding box
     top_left = face.bounding_poly.vertices[0]
