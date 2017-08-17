@@ -102,7 +102,7 @@ def render_emoji(image, face):
     bottom_right = face.bounding_poly.vertices[2]
     middle_x = (top_left.x + bottom_right.x) / 2
     middle_y = (top_left.y + bottom_right.y) / 2
-    image.paste(emoji, (middle_x - 64, middle_y - 64))
+    image.paste(emoji, (middle_x - 64, middle_y - 64), emoji.convert('RGBA'))
 
 
 # [START def_main]
