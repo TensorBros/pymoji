@@ -68,9 +68,9 @@ jobs:
       - run:
           name: run tests
           command: |
-            echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
+            echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ~/gcloud-service-key.json
             source ~/google-cloud-sdk/path.bash.inc
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             source venv/bin/activate
             python -m pytest --junitxml=tmp/test-reports.xml
       - store_test_results:
