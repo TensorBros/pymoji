@@ -22,11 +22,11 @@ import argparse
 from google.cloud import vision
 # [END import_client_library]
 from google.cloud.vision import types
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 
 # [START def_detect_face]
-def detect_face(face_file, max_results=4):
+def detect_face(face_file):
     """Uses the Vision API to detect faces in the given file.
 
     Args:
@@ -120,13 +120,13 @@ def render_emoji(image, face):
     height = (bottom_right.y - top_left.y)
     middle_x = (top_left.x + bottom_right.x) / 2
     middle_y = (top_left.y + bottom_right.y) / 2
-    image.paste(emoji.resize((width, height), resample=0), (middle_x - width/2, middle_y - height/2), emoji.convert('RGBA').resize((width, height), resample=0))
+    emoji = emoji.resize((width, height), resample=0).convert('RGBA')
+    image.paste(emoji, (middle_x - width/2, middle_y - height/2), emoji)
 
-    # emoji.convert('RGBA').resize((width, height), resample=0)
 # [START def_main]
-def main(input_filename, output_filename, max_results):
+def main(input_filename, output_filename):
     with open(input_filename, 'rb') as image:
-        faces = detect_face(image, max_results)
+        faces = detect_face(image)
         print('Found {} face{}'.format(
             len(faces), '' if len(faces) == 1 else 's'))
         if len(faces) > 0:
@@ -145,9 +145,6 @@ if __name__ == '__main__':
     parser.add_argument(
         '--out', dest='output', default='out.jpg',
         help='the name of the output file.')
-    parser.add_argument(
-        '--max-results', dest='max_results', default=4,
-        help='the max results of face detection.')
     args = parser.parse_args()
 
-    main(args.input_image, args.output, args.max_results)
+    main(args.input_image, args.output)
