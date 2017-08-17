@@ -27,6 +27,8 @@ jobs:
           command: |
             if [ ! -d ~/google-cloud-sdk ]; then
               curl https://sdk.cloud.google.com | bash
+            else
+              echo 'using cached google-cloud-sdk'
             fi
           environment:
             CLOUDSDK_CORE_DISABLE_PROMPTS: 1
@@ -34,6 +36,15 @@ jobs:
           paths:
             - ~/google-cloud-sdk
           key: google-cloud-sdk-166.0.0
+      - run:
+          name: update and auth gcloud sdk
+          command: |
+            echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
+            source ~/google-cloud-sdk/path.bash.inc
+            gcloud --quiet components update
+            gcloud --quiet config set project $GCLOUD_PROJECT_ID
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+
 
       # Download and cache dependencies
       - restore_cache:
@@ -77,11 +88,7 @@ jobs:
           name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
               source ~/google-cloud-sdk/path.bash.inc
-              gcloud --quiet components update
-              gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-              gcloud --quiet config set project $GCLOUD_PROJECT_ID
               gcloud --quiet app deploy --promote
             fi
 
