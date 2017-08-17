@@ -32,7 +32,6 @@ jobs:
             fi
             source ~/google-cloud-sdk/path.bash.inc
             gcloud --quiet components update
-            echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
           environment:
             CLOUDSDK_CORE_DISABLE_PROMPTS: 1
       - save_cache:
@@ -69,6 +68,7 @@ jobs:
       - run:
           name: run tests
           command: |
+            echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
             source ~/google-cloud-sdk/path.bash.inc
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             source venv/bin/activate
@@ -84,6 +84,7 @@ jobs:
           name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
               source ~/google-cloud-sdk/path.bash.inc
               gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               gcloud --quiet config set project $GCLOUD_PROJECT_ID
