@@ -27,7 +27,10 @@ jobs:
           command: |
             if [ ! -d ~/google-cloud-sdk ]; then
               curl https://sdk.cloud.google.com | bash
+            else
+              echo 'using cached google-cloud-sdk'
             fi
+            echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
           environment:
             CLOUDSDK_CORE_DISABLE_PROMPTS: 1
       - save_cache:
@@ -77,11 +80,12 @@ jobs:
           name: maybe deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo $GCLOUD_SERVICE_KEY | base64 --decode --ignore-garbage > ${HOME}/gcloud-service-key.json
               source ~/google-cloud-sdk/path.bash.inc
               gcloud --quiet components update
               gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               gcloud --quiet config set project $GCLOUD_PROJECT_ID
               gcloud --quiet app deploy --promote
+            else
+              echo 'skipping deployment for non-master branch'
             fi
 
