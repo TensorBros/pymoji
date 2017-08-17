@@ -63,7 +63,8 @@ def highlight_faces(image, faces, output_filename):
     for face in faces:
         box = [(vertex.x, vertex.y)
                for vertex in face.bounding_poly.vertices]
-        draw.line(box + [box[0]], width=5, fill='#00ff00')
+        # Turn off bounding box for now
+        #draw.line(box + [box[0]], width=5, fill='#00ff00')
         render_emoji(im, face)
 
     im.save(output_filename)
@@ -100,11 +101,13 @@ def render_emoji(image, face):
     # hackily render emoji in center of bounding box
     top_left = face.bounding_poly.vertices[0]
     bottom_right = face.bounding_poly.vertices[2]
+    width = (bottom_right.x - top_left.x)
+    height = (bottom_right.y - top_left.y)
     middle_x = (top_left.x + bottom_right.x) / 2
     middle_y = (top_left.y + bottom_right.y) / 2
-    image.paste(emoji, (middle_x - 64, middle_y - 64), emoji.convert('RGBA'))
+    image.paste(emoji.resize((width, height), resample=0), (middle_x - width/2, middle_y - height/2), emoji.convert('RGBA').resize((width, height), resample=0))
 
-
+    # emoji.convert('RGBA').resize((width, height), resample=0)
 # [START def_main]
 def main(input_filename, output_filename, max_results):
     with open(input_filename, 'rb') as image:
