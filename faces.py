@@ -114,11 +114,11 @@ def main(input_filename, output_filename, max_results):
         faces = detect_face(image, max_results)
         print('Found {} face{}'.format(
             len(faces), '' if len(faces) == 1 else 's'))
-
-        print('Writing to file {}'.format(output_filename))
-        # Reset the file pointer, so we can read the file again
-        image.seek(0)
-        highlight_faces(image, faces, output_filename)
+        if len(faces) > 0:
+            print('Writing to file {}'.format(output_filename))
+            # Reset the file pointer, so we can read the file again
+            image.seek(0)
+            highlight_faces(image, faces, output_filename)
 # [END def_main]
 
 
