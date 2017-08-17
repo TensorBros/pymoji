@@ -79,24 +79,39 @@ def render_emoji(image, face):
       face: a face object in the format returned by the Vision API.
     """
 
-    # default
+    # default face that everyone starts with:
     emoji = Image.open("resources/emoji/1f642.png")
 
+    # all faces are 128x128 .pngs from https://www.emojione.com/emoji/v3
+    
+    # extras:
+    # basic_smile = Image.open("resources/emoji/1f642.png")
+    # roseycheeks = Image.open("resources/emoji/1f60a.png")
+    # expressionless_face = Image.open("resources/emoji/1f610.png")
+    # confused = Image.open("resources/emoji/1f615.png")
+    # tears = Image.open("resources/emoji/1f602.png")
+
     # basic sentiment emoji
-    joy_emoji = Image.open("resources/emoji/1f604.png")
     sorrow_emoji = Image.open("resources/emoji/1f622.png")
     anger_emoji = Image.open("resources/emoji/1f620.png")
     surprise_emoji = Image.open("resources/emoji/1f632.png")
+    joy_1_emoji = Image.open("resources/emoji/1f601.png")
+    joy_2_emoji = Image.open("resources/emoji/1f604.png")
+    joy_3_emoji = Image.open("resources/emoji/1f606.png")
 
     # super crude sentiment logic
-    if face.sorrow_likelihood > 2:
+    if face.sorrow_likelihood > 1:
         emoji = sorrow_emoji
-    elif face.anger_likelihood > 2:
+    elif face.anger_likelihood > 1:
         emoji = anger_emoji
-    elif face.surprise_likelihood > 3:
+    elif face.surprise_likelihood > 1:
         emoji = surprise_emoji
-    elif face.joy_likelihood > 3:
-        emoji = joy_emoji
+    elif face.joy_likelihood > 4:
+        emoji = joy_3_emoji
+    elif face.joy_likelihood > 2:
+        emoji = joy_2_emoji
+    elif face.joy_likelihood > 1:
+        emoji = joy_1_emoji
 
     # hackily render emoji in center of bounding box
     top_left = face.bounding_poly.vertices[0]
