@@ -9,7 +9,7 @@ def process_folder(path):
     for file_name in os.listdir(path):
         actual_file_location = os.path.join(path, file_name)
         is_jpg = (os.path.splitext(file_name)[1] == '.jpg' or os.path.splitext(file_name)[1] == '.JPG')
-        print(is_jpg)
+
         if os.path.isfile(actual_file_location) and is_jpg:
             image = PIL.Image.open(actual_file_location)
             try:
