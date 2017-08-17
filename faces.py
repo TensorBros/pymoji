@@ -22,7 +22,7 @@ import argparse
 from google.cloud import vision
 # [END import_client_library]
 from google.cloud.vision import types
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 
 # [START def_detect_face]
@@ -64,9 +64,45 @@ def highlight_faces(image, faces, output_filename):
         box = [(vertex.x, vertex.y)
                for vertex in face.bounding_poly.vertices]
         draw.line(box + [box[0]], width=5, fill='#00ff00')
+        render_emoji(im, face)
 
     im.save(output_filename)
 # [END def_highlight_faces]
+
+
+def render_emoji(image, face):
+    """Hacky helper method to start exposing sentiment likelihood scores.
+
+    Args:
+      image: a PIL.Image
+      face: a face object in the format returned by the Vision API.
+    """
+
+    # default
+    emoji = Image.open("resources/emoji/1f642.png")
+
+    # basic sentiment emoji
+    joy_emoji = Image.open("resources/emoji/1f604.png")
+    sorrow_emoji = Image.open("resources/emoji/1f622.png")
+    anger_emoji = Image.open("resources/emoji/1f620.png")
+    surprise_emoji = Image.open("resources/emoji/1f632.png")
+
+    # super crude sentiment logic
+    if face.sorrow_likelihood > 2:
+        emoji = sorrow_emoji
+    elif face.anger_likelihood > 2:
+        emoji = anger_emoji
+    elif face.joy_likelihood > 3:
+        emoji = joy_emoji
+    elif face.surprise_likelihood > 3:
+        emoji = surprise_emoji
+
+    # hackily render emoji in center of bounding box
+    top_left = face.bounding_poly.vertices[0]
+    bottom_right = face.bounding_poly.vertices[2]
+    middle_x = (top_left.x + bottom_right.x) / 2
+    middle_y = (top_left.y + bottom_right.y) / 2
+    image.paste(emoji, (middle_x - 64, middle_y - 64))
 
 
 # [START def_main]
