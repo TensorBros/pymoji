@@ -2,8 +2,11 @@
 
 import argparse
 import os
-import pymoji.faces
+
 import PIL
+
+from pymoji import faces
+
 
 def process_folder(path):
     for file_name in os.listdir(path):
@@ -16,11 +19,12 @@ def process_folder(path):
                 image.load()
                 print('processing ' + os.path.splitext(file_name)[0])
                 result_file = 'emojied_' + os.path.splitext(file_name)[0] + '.jpg'
-                faces.main(os.path.join(path, file_name), os.path.join(path, result_file), 5)
+                faces.main(os.path.join(path, file_name), os.path.join(path, result_file))
             except IOError as e:
                 print 'Bad image: %s' % e
         else:
             print('skipped non-image file')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
