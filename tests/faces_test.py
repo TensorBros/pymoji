@@ -3,12 +3,13 @@ import os
 
 from PIL import Image
 
+from pymoji.process_folder import generate_output_path
 from pymoji.faces import main
 from pymoji.app import RESOURCES, OUTPUT_DIR
 
 
 def test_main(tmpdir):
-    out_file = os.path.join(OUTPUT_DIR, 'face-output.jpg')
+    out_file = generate_output_path('face-input.jpg')
     in_file = os.path.join(RESOURCES, 'face-input.jpg')
 
     # Make sure there isn't already a green box

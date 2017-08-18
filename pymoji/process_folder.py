@@ -9,7 +9,14 @@ from pymoji.app import OUTPUT_DIR
 
 #TODO put this into a helper/utilities file if it's used by both process_folder and faces.py
 def generate_output_path(input_image):
-    # mkdir if OUTPUT_DIR doesn't exist?
+    """Makes a path to save the result image into. Makes the dir if it ain't there.
+
+    Args:
+        input_image: A string, eg "face-input.jpg"
+
+    Returns:
+        "pymoji/static/gen/face-input-output.jpg"
+    """
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
