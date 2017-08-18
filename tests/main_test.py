@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import main
+import pymoji.app as main
 
 
 def test_index():
