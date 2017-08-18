@@ -74,7 +74,7 @@ cd pymoji
 - Open a terminal and run the dev server:
 ```bash
 cd pymoji
-python main.py
+python pymoji/app.py
 ```
 
 - Open a browser and navigate to http://localhost:8080
