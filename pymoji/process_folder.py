@@ -7,7 +7,12 @@ from pymoji import faces
 from pymoji.app import OUTPUT_DIR
 
 
+#TODO put this into a helper/utilities file if it's used by both process_folder and faces.py
 def generate_output_path(input_image):
+    # mkdir if OUTPUT_DIR doesn't exist?
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
     filename = input_image.split('.')[-2]
     extension = input_image.split('.')[-1]
     output_image = filename + "-output." + extension
