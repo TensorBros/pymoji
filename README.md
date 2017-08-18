@@ -26,7 +26,8 @@ eval "$(pyenv virtualenv-init -)"
 - If deploying via Google Cloud
 ```bash
 brew cask install google-cloud-sdk
-gcloud init
+cd pymoji
+./gcloud init
 # enter 'pymoji-176318' for project
 ```
 
@@ -84,7 +85,7 @@ python manage.py runserver
 ## Deploy to Cloud (Manual)
 
 ```bash
-gcloud app deploy --project pymoji-176318
+./gcloud app deploy --project pymoji-176318
 ```
 
 

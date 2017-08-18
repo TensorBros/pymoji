@@ -1,0 +1,16 @@
+#!/bin/sh
+if [ -f .python-version ]; then
+    echo 'moving preexisting python version out of the way'
+    mv .python-version .python-version.bak
+fi
+
+echo '2.7.13' > .python-version
+gcloud "$@"
+RESULT=$?
+
+if [ -f .python-version.bak ]; then
+    echo 'restoring preexisting python version'
+    mv .python-version.bak .python-version
+fi
+
+exit RESULT
