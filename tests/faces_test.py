@@ -4,10 +4,10 @@ from PIL import Image
 
 from pymoji.process_folder import generate_output_path
 from pymoji.faces import main
-from pymoji.app import RESOURCES, OUTPUT_DIR
+from pymoji.app import RESOURCES
 
 
-def test_main(tmpdir):
+def test_main():
     out_file = generate_output_path('face-input.jpg')
     in_file = os.path.join(RESOURCES, 'face-input.jpg')
 

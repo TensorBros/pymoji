@@ -22,8 +22,8 @@ def detect_face(face_file):
     """
     client = vision.ImageAnnotatorClient()
     content = face_file.read()
-    image = types.Image(content=content)
-    return client.face_detection(image=image).face_annotations
+    image = types.Image(content=content) # pylint: disable=no-member
+    return client.face_detection(image=image).face_annotations # pylint: disable=no-member
 
 
 def replace_faces(image, faces, output_filename):
