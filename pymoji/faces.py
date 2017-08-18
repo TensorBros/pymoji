@@ -17,12 +17,17 @@
 """Draws squares around detected faces in the given image."""
 
 import argparse
+import os
 
 # [START import_client_library]
 from google.cloud import vision
 # [END import_client_library]
 from google.cloud.vision import types
 from PIL import Image, ImageDraw
+
+from pymoji.app import RESOURCES
+
+EMOJI_DIR = os.path.join(RESOURCES, 'emoji')
 
 
 # [START def_detect_face]
@@ -71,6 +76,11 @@ def highlight_faces(image, faces, output_filename):
 # [END def_highlight_faces]
 
 
+def open_emoji(code):
+    path = os.path.join(EMOJI_DIR, code + ".png")
+    return Image.open(path)
+
+
 def render_emoji(image, face):
     """Hacky helper method to start exposing sentiment likelihood scores.
 
@@ -80,24 +90,24 @@ def render_emoji(image, face):
     """
 
     # default face that everyone starts with:
-    emoji = Image.open("resources/emoji/1f642.png")
+    emoji = open_emoji("1f642")
 
     # all faces are 128x128 .pngs from https://www.emojione.com/emoji/v3
-    
+
     # extras:
-    # basic_smile = Image.open("resources/emoji/1f642.png")
-    # roseycheeks = Image.open("resources/emoji/1f60a.png")
-    # expressionless_face = Image.open("resources/emoji/1f610.png")
-    # confused = Image.open("resources/emoji/1f615.png")
-    # tears = Image.open("resources/emoji/1f602.png")
+    # basic_smile = open_emoji("1f642")
+    # roseycheeks = open_emoji("1f60a")
+    # expressionless_face = open_emoji("1f610")
+    # confused = open_emoji("1f615")
+    # tears = open_emoji("1f602")
 
     # basic sentiment emoji
-    sorrow_emoji = Image.open("resources/emoji/1f622.png")
-    anger_emoji = Image.open("resources/emoji/1f620.png")
-    surprise_emoji = Image.open("resources/emoji/1f632.png")
-    joy_1_emoji = Image.open("resources/emoji/1f601.png")
-    joy_2_emoji = Image.open("resources/emoji/1f604.png")
-    joy_3_emoji = Image.open("resources/emoji/1f606.png")
+    sorrow_emoji = open_emoji("1f622")
+    anger_emoji = open_emoji("1f620")
+    surprise_emoji = open_emoji("1f632")
+    joy_1_emoji = open_emoji("1f601")
+    joy_2_emoji = open_emoji("1f604")
+    joy_3_emoji = open_emoji("1f606")
 
     # super crude sentiment logic
     if face.sorrow_likelihood > 1:
