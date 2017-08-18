@@ -5,6 +5,7 @@ gunicorn==19.7.1
 
 # testing and code quality
 pylint==1.7.2
+pylint-flask==0.5
 pytest==3.2.1
 
 # vision sdk
