@@ -2,7 +2,7 @@
 
 import argparse
 import os
-import faces
+import pymoji.faces
 import PIL
 
 def process_folder(path):
@@ -16,7 +16,7 @@ def process_folder(path):
                 image.load()
                 print('processing ' + os.path.splitext(file_name)[0])
                 result_file = 'emojied_' + os.path.splitext(file_name)[0] + '.jpg'
-                faces.main(os.path.join(path, file_name), os.path.join(path, result_file), 5)             
+                faces.main(os.path.join(path, file_name), os.path.join(path, result_file), 5)
             except IOError as e:
                 print 'Bad image: %s' % e
         else:

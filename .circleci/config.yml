@@ -61,7 +61,7 @@ jobs:
           command: |
             source venv/bin/activate
             echo 'skipping linters'
-            #pylint --disable=C *.py
+            #pylint --disable=C pymoji
 
       # Run tests and save results
       - run:
