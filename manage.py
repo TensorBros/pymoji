@@ -6,7 +6,7 @@ import os
 
 from flask_script import Manager
 
-from pymoji.app import app, RESOURCES, OUTPUT_DIR
+from pymoji.app import app, RESOURCES
 from pymoji import faces, process_folder
 
 
