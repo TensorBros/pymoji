@@ -6,7 +6,6 @@
     }],
     "SublimeLinter":
     {
-        "@python": 3.5,
         "python_paths":
         {
             "linux": [],

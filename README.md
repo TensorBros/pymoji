@@ -68,7 +68,7 @@ cd pymoji
   ```bash
   pyenv global 3.5.3
   cd ~ # go somewhere that falls through to global environment
-  pip install pylint
+  pip install pylint pylint-flask
   ```
 
 
