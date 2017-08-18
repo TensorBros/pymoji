@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-import pymoji.app as main
+from __future__ import absolute_import, print_function, unicode_literals
+
+from pymoji.app import app
 
 
 def test_index():
-    main.app.testing = True
-    client = main.app.test_client()
+    app.testing = True
+    client = app.test_client()
 
     r = client.get('/')
     assert r.status_code == 200

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import absolute_import, print_function, unicode_literals
 import argparse
 import os
 
@@ -21,7 +21,7 @@ def process_folder(path):
                 result_file = 'emojied_' + os.path.splitext(file_name)[0] + '.jpg'
                 faces.main(os.path.join(path, file_name), os.path.join(path, result_file))
             except IOError as e:
-                print 'Bad image: %s' % e
+                print('Bad image: %s' % e)
         else:
             print('skipped non-image file')
 
