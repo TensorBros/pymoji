@@ -61,8 +61,8 @@ jobs:
           name: run linters
           command: |
             source venv/bin/activate
-            pylint --disable=C manage.py
-            pylint --disable=C pymoji
+            pylint manage.py
+            pylint pymoji
 
       # Run tests and save results
       - run:
