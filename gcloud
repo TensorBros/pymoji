@@ -13,4 +13,4 @@ if [ -f .python-version.bak ]; then
     mv .python-version.bak .python-version
 fi
 
-exit RESULT
+exit $RESULT
