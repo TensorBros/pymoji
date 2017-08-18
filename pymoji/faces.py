@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Replaces detected faces in the given image with emoji."""
 from __future__ import absolute_import, print_function, unicode_literals
 import argparse
@@ -122,16 +121,3 @@ def main(input_filename, output_filename):
             # Reset the file pointer, so we can read the file again
             image.seek(0)
             replace_faces(image, faces, output_filename)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Detects faces in the given image.')
-    parser.add_argument(
-        'input_image', help='the image you\'d like to detect faces in.')
-    parser.add_argument(
-        '--out', dest='output', default='out.jpg',
-        help='the name of the output file.')
-    args = parser.parse_args()
-
-    main(args.input_image, args.output)
