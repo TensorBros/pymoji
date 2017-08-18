@@ -33,13 +33,13 @@ gcloud init
 ### 🐍 Python Environment
 
 - Snake menagerie tamed via [pyenv](https://github.com/pyenv/) and [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv)
-- Install Python 2 if necessary
+- Install Python 3 if necessary
 ```bash
-pyenv install 2.7.13
+pyenv install 3.5.3
 ```
 - Create new virtual environment
 ```bash
-pyenv virtualenv 2.7.13 pymoji
+pyenv virtualenv 3.5.3 pymoji
 ```
 - Install dependencies
 ```bash
@@ -63,7 +63,7 @@ cd pymoji
   - [eslint extension](https://packagecontrol.io/packages/SublimeLinter-contrib-eslint)
   - IMPORTANT: because reasons, you must also do some global setup:
   ```bash
-  pyenv global 2.7.13
+  pyenv global 3.5.3
   cd ~ # go somewhere that falls through to global environment
   pip install pylint
   ```

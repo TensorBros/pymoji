@@ -1,7 +1,6 @@
 """Script manager for running locally. Gunicorn is used to run the
 application on Google App Engine. See entrypoint in app.yaml.
 """
-from __future__ import absolute_import, print_function, unicode_literals
 import os
 
 from flask_script import Manager
@@ -10,10 +9,10 @@ from pymoji.app import app, RESOURCES
 from pymoji import faces, process_folder
 
 
-manager = Manager(app)
+MANAGER = Manager(app)
 
 
-@manager.command
+@MANAGER.command
 def runface(input_image=None, output_image=None):
     """Processes faces in the specified image.
 
@@ -31,7 +30,7 @@ def runface(input_image=None, output_image=None):
     faces.main(input_path, output_path)
 
 
-@manager.command
+@MANAGER.command
 def runfolder(directory=None):
     """Processes images in the specified directory.
 
@@ -42,4 +41,4 @@ def runfolder(directory=None):
 
 
 if __name__ == "__main__":
-    manager.run()
+    MANAGER.run()
