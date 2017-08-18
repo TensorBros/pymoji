@@ -19,7 +19,7 @@ def runface(input_image=None, output_image=None):
 
     Args:
         input_image: name of image resource file to process faces in.
-        output_image: name of output file to write modified image to.
+        output_image: name of output file to write modified image to. (optional)
     """
     input_path = os.path.join(RESOURCES, input_image)
 
