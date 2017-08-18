@@ -15,9 +15,12 @@
 
 # [START app]
 import logging
+import os
 
 from flask import Flask
 
+RESOURCES = os.path.join('pymoji', 'static')
+OUTPUT_DIR = os.path.join(RESOURCES, 'gen')
 
 app = Flask(__name__)
 

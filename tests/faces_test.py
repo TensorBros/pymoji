@@ -16,12 +16,11 @@ import os
 from PIL import Image
 
 from pymoji.faces import main
-
-RESOURCES = os.path.join(os.path.dirname(__file__), 'resources')
+from pymoji.app import RESOURCES, OUTPUT_DIR
 
 
 def test_main(tmpdir):
-    out_file = os.path.join(tmpdir.dirname, 'face-output.jpg')
+    out_file = os.path.join(OUTPUT_DIR, 'face-output.jpg')
     in_file = os.path.join(RESOURCES, 'face-input.jpg')
 
     # Make sure there isn't already a green box
