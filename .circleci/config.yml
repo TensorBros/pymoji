@@ -68,6 +68,7 @@ jobs:
           name: run tests
           command: |
             source venv/bin/activate
+            mkdir pymoji/static/gen
             python -m pytest --junitxml=tmp/test-reports.xml
       - store_test_results:
           path: tmp
