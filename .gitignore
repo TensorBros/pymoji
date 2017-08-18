@@ -103,5 +103,8 @@ ENV/
 # mypy
 .mypy_cache/
 
+# generated images
+pymoji/static/gen/
+
 # Sublime
 *.sublime-workspace
