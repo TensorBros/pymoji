@@ -45,6 +45,7 @@ pyenv virtualenv 3.5.3 pymoji
 ```bash
 cd pymoji
 echo 'pymoji' > .python-version
+pip install --upgrade pip setuptools
 pip install -r requirements.txt
 ```
 

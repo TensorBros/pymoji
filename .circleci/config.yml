@@ -47,8 +47,9 @@ jobs:
       - run:
           name: install python dependencies
           command: |
-            virtualenv venv
+            python3 -m venv venv
             source venv/bin/activate
+            pip install --upgrade pip setuptools
             pip install -r requirements.txt
       - save_cache:
           paths:
@@ -60,7 +61,6 @@ jobs:
           name: run linters
           command: |
             source venv/bin/activate
-            echo 'skipping linters'
             pylint --disable=C manage.py
             pylint --disable=C pymoji
 
