@@ -14,15 +14,6 @@
                 "~/.pyenv/shims"
             ],
             "windows": []
-        },
-        "linters":
-        {
-            "pylint":
-            {
-                "disable": [
-                    "C"
-                ]
-            }
         }
     }
 }
