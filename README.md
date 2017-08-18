@@ -34,9 +34,10 @@ cd pymoji
 ### 🐍 Python Environment
 
 - Snake menagerie tamed via [pyenv](https://github.com/pyenv/) and [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv)
-- Install Python 3 if necessary
+- Install versions of Python if necessary
 ```bash
-pyenv install 3.5.3
+pyenv install 2.7.13 # necessary for google cloud sdk
+pyenv install 3.5.3 # necessary for pymoji
 ```
 - Create new virtual environment
 ```bash
