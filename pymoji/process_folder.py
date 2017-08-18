@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from __future__ import absolute_import, print_function, unicode_literals
 import argparse
 import os
@@ -6,6 +5,14 @@ import os
 import PIL
 
 from pymoji import faces
+from pymoji.app import OUTPUT_DIR
+
+
+def generate_output_path(input_image):
+    filename = input_image.split('.')[-2]
+    extension = input_image.split('.')[-1]
+    output_image = filename + "-output." + extension
+    return os.path.join(OUTPUT_DIR, output_image)
 
 
 def process_folder(path):
@@ -18,19 +25,9 @@ def process_folder(path):
             try:
                 image.load()
                 print('processing ' + os.path.splitext(file_name)[0])
-                result_file = 'emojied_' + os.path.splitext(file_name)[0] + '.jpg'
-                faces.main(os.path.join(path, file_name), os.path.join(path, result_file))
+                output_path = generate_output_path(file_name)
+                faces.main(os.path.join(path, file_name), output_path)
             except IOError as e:
                 print('Bad image: %s' % e)
         else:
             print('skipped non-image file')
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Process a directory of photos into emojifaces')
-    parser.add_argument(
-        'path', help='path to the target directory')
-    args = parser.parse_args()
-
-    process_folder(args.path)
