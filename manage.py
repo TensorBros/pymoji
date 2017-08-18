@@ -22,11 +22,12 @@ def runface(input_image=None, output_image=None):
         output_image: name of output file to write modified image to.
     """
     input_path = os.path.join(RESOURCES, input_image)
-    if not output_image:
-        filename = input_image.split('.')[-2]
-        extension = input_image.split('.')[-1]
-        output_image = filename + "-output." + extension
-    output_path = os.path.join(RESOURCES, output_image)
+
+    if output_image:
+        output_path = os.path.join(RESOURCES, output_image)
+    else:
+        output_path = process_folder.generate_output_path(input_image)
+
     faces.main(input_path, output_path)
 
 
