@@ -1,36 +1,19 @@
 #!/usr/bin/env python
-
-# Copyright 2015 Google, Inc
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""Draws squares around detected faces in the given image."""
+"""Replaces detected faces in the given image with emoji."""
 
 import argparse
 import os
 
-# [START import_client_library]
 from google.cloud import vision
-# [END import_client_library]
 from google.cloud.vision import types
-from PIL import Image, ImageDraw
+from PIL import Image
 
 from pymoji.app import RESOURCES
+
 
 EMOJI_DIR = os.path.join(RESOURCES, 'emoji')
 
 
-# [START def_detect_face]
 def detect_face(face_file):
     """Uses the Vision API to detect faces in the given file.
 
@@ -40,43 +23,40 @@ def detect_face(face_file):
     Returns:
         An array of Face objects with information about the picture.
     """
-    # [START get_vision_service]
     client = vision.ImageAnnotatorClient()
-    # [END get_vision_service]
-
     content = face_file.read()
     image = types.Image(content=content)
-
     return client.face_detection(image=image).face_annotations
-# [END def_detect_face]
 
 
-# [START def_highlight_faces]
-def highlight_faces(image, faces, output_filename):
-    """Draws a polygon around the faces, then saves to output_filename.
+def replace_faces(image, faces, output_filename):
+    """Replaces all faces with emoji, then saves to output_filename.
 
     Args:
-      image: a file containing the image with the faces.
-      faces: a list of faces found in the file. This should be in the format
-          returned by the Vision API.
-      output_filename: the name of the image file to be created, where the
-          faces have polygons drawn around them.
+        image: a file containing the image with the faces.
+        faces: a list of faces found in the file. This should be in the format
+            returned by the Vision API.
+        output_filename: the name of the image file to be created, where the
+            faces have polygons drawn around them.
     """
     im = Image.open(image)
-    draw = ImageDraw.Draw(im)
 
     for face in faces:
-        box = [(vertex.x, vertex.y)
-               for vertex in face.bounding_poly.vertices]
-        # Turn off bounding box for now
-        #draw.line(box + [box[0]], width=5, fill='#00ff00')
         render_emoji(im, face)
 
     im.save(output_filename)
-# [END def_highlight_faces]
 
 
 def open_emoji(code):
+    """Generates a PIL.Image from the specified emoji code.
+    All image files are 128x128 .pngs from https://www.emojione.com/emoji/v3
+
+    Args:
+        code: a string containing the code for the desired emoji.
+
+    Returns:
+        a PIL.Image of the emoji.
+    """
     path = os.path.join(EMOJI_DIR, code + ".png")
     return Image.open(path)
 
@@ -85,14 +65,12 @@ def render_emoji(image, face):
     """Hacky helper method to start exposing sentiment likelihood scores.
 
     Args:
-      image: a PIL.Image
-      face: a face object in the format returned by the Vision API.
+        image: a PIL.Image
+        face: a face object in the format returned by the Vision API.
     """
 
     # default face that everyone starts with:
     emoji = open_emoji("1f642")
-
-    # all faces are 128x128 .pngs from https://www.emojione.com/emoji/v3
 
     # extras:
     # basic_smile = open_emoji("1f642")
@@ -133,7 +111,7 @@ def render_emoji(image, face):
     emoji = emoji.resize((width, height), resample=0).convert('RGBA')
     image.paste(emoji, (middle_x - width/2, middle_y - height/2), emoji)
 
-# [START def_main]
+
 def main(input_filename, output_filename):
     with open(input_filename, 'rb') as image:
         faces = detect_face(image)
@@ -143,8 +121,7 @@ def main(input_filename, output_filename):
             print('Writing to file {}'.format(output_filename))
             # Reset the file pointer, so we can read the file again
             image.seek(0)
-            highlight_faces(image, faces, output_filename)
-# [END def_main]
+            replace_faces(image, faces, output_filename)
 
 
 if __name__ == '__main__':
