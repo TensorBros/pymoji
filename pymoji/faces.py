@@ -56,7 +56,7 @@ def open_emoji(code):
         a PIL.Image of the emoji.
     """
     path = os.path.join(EMOJI_DIR, code + ".png")
-    return Image.open(path)
+    return Image.open(path).convert('RGBA')
 
 
 def render_emoji(image, face):
@@ -68,36 +68,36 @@ def render_emoji(image, face):
     """
 
     # default face that everyone starts with:
-    emoji = open_emoji("1f642")
+    emoji_code = "1f642"
 
     # extras:
-    # basic_smile = open_emoji("1f642")
-    # roseycheeks = open_emoji("1f60a")
-    # expressionless_face = open_emoji("1f610")
-    # confused = open_emoji("1f615")
-    # tears = open_emoji("1f602")
+    # basic_smile_code = "1f642"
+    # roseycheeks_code = "1f60a"
+    # expressionless_face_code = "1f610"
+    # confused_code = "1f615"
+    # tears_code = "1f602"
 
     # basic sentiment emoji
-    sorrow_emoji = open_emoji("1f622")
-    anger_emoji = open_emoji("1f620")
-    surprise_emoji = open_emoji("1f632")
-    joy_1_emoji = open_emoji("1f601")
-    joy_2_emoji = open_emoji("1f604")
-    joy_3_emoji = open_emoji("1f606")
+    sorrow_emoji_code = "1f622"
+    anger_emoji_code = "1f620"
+    surprise_emoji_code = "1f632"
+    joy_1_emoji_code = "1f601"
+    joy_2_emoji_code = "1f604"
+    joy_3_emoji_code = "1f606"
 
     # super crude sentiment logic
     if face.sorrow_likelihood > 1:
-        emoji = sorrow_emoji
+        emoji_code = sorrow_emoji_code
     elif face.anger_likelihood > 1:
-        emoji = anger_emoji
+        emoji_code = anger_emoji_code
     elif face.surprise_likelihood > 1:
-        emoji = surprise_emoji
+        emoji_code = surprise_emoji_code
     elif face.joy_likelihood > 4:
-        emoji = joy_3_emoji
+        emoji_code = joy_3_emoji_code
     elif face.joy_likelihood > 2:
-        emoji = joy_2_emoji
+        emoji_code = joy_2_emoji_code
     elif face.joy_likelihood > 1:
-        emoji = joy_1_emoji
+        emoji_code = joy_1_emoji_code
 
     # hackily render emoji in center of bounding box
     top_left = face.bounding_poly.vertices[0]
@@ -106,7 +106,7 @@ def render_emoji(image, face):
     height = (bottom_right.y - top_left.y)
     middle_x = (top_left.x + bottom_right.x) / 2
     middle_y = (top_left.y + bottom_right.y) / 2
-    emoji = emoji.resize((width, height), resample=0).convert('RGBA')
+    emoji = open_emoji(emoji_code).resize((width, height), resample=0)
     image.paste(emoji, (middle_x - width/2, middle_y - height/2), emoji)
 
 
