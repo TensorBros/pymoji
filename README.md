@@ -74,10 +74,10 @@ cd pymoji
 - Open a terminal and run the dev server:
 ```bash
 cd pymoji
-python pymoji/app.py
+python manage.py runserver
 ```
 
-- Open a browser and navigate to http://localhost:8080
+- Open a browser and navigate to http://localhost:5000
 
 
 ## Deploy to Cloud (Manual)
