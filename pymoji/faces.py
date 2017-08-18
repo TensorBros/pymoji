@@ -1,5 +1,4 @@
 """Replaces detected faces in the given image with emoji."""
-from __future__ import absolute_import, print_function, unicode_literals
 import os
 
 from google.cloud import vision
@@ -99,15 +98,13 @@ def render_emoji(image, face):
     elif face.joy_likelihood > 1:
         emoji_code = joy_1_emoji_code
 
-    # hackily render emoji in center of bounding box
+    # scale and render emoji over bounding box
     top_left = face.bounding_poly.vertices[0]
     bottom_right = face.bounding_poly.vertices[2]
     width = (bottom_right.x - top_left.x)
     height = (bottom_right.y - top_left.y)
-    middle_x = (top_left.x + bottom_right.x) / 2
-    middle_y = (top_left.y + bottom_right.y) / 2
     emoji = open_emoji(emoji_code).resize((width, height), resample=0)
-    image.paste(emoji, (middle_x - width/2, middle_y - height/2), emoji)
+    image.paste(emoji, (top_left.x, top_left.y), emoji)
 
 
 def main(input_filename, output_filename):

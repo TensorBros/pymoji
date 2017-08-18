@@ -9,7 +9,7 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:2.7.13
+      - image: circleci/python:3.5.3
 
     working_directory: ~/pymoji
     steps:
@@ -61,8 +61,8 @@ jobs:
           command: |
             source venv/bin/activate
             echo 'skipping linters'
-            #pylint --disable=C manage.py
-            #pylint --disable=C pymoji
+            pylint --disable=C manage.py
+            pylint --disable=C pymoji
 
       # Run tests and save results
       - run:
