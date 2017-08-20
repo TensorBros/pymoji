@@ -8,19 +8,46 @@ from PIL import Image
 from pymoji.constants import EMOJI_DIR, LIKELY, MAX_RESULTS, OUTPUT_DIR, UNLIKELY, VERY_UNLIKELY
 
 
-def detect_face(face_file):
-    """Uses the Vision API to detect faces in the given file.
+def detect_face(input_content=None, input_source=None):
+    """Uses the Vision API to detect faces in an input image. Pass the input
+    image as a binary stream (takes precedence), Google Cloud source URI,
+    or both.
+
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/index.html#annotate-an-image
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.Image
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.AnnotateImageRequest
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.Feature
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.AnnotateImageResponse
 
     Args:
-        face_file: A file-like object containing an image with faces.
+        input_content: a binary stream containing an image with faces.
+        input_source: an image uri for either Google Cloud storage
+            e.g. 'gs://bucket_name/path/to/image.jpg'
+            or public http/https url
+            e.g. 'http://cdn/path/to/image.jpg'
 
     Returns:
         An array of Face objects with information about the picture.
     """
     client = vision.ImageAnnotatorClient()
-    content = face_file.read()
-    image = types.Image(content=content) # pylint: disable=no-member
-    return client.face_detection(image=image).face_annotations # pylint: disable=no-member
+
+    # convert input image to Google Cloud Image
+    content = None
+    source = None
+    if input_content:
+        content = input_content.read()
+    elif input_source:
+        source = input_source
+    image = types.Image(content=content, source=source) # pylint: disable=no-member
+
+    features = [{
+        'type': vision.enums.Feature.Type.FACE_DETECTION,
+        'max_results': MAX_RESULTS
+    }]
+    return client.annotate_image({
+        'image': image,
+        'features': features
+        }).face_annotations # pylint: disable=no-member
 
 
 def replace_faces(image, faces, output_filename):

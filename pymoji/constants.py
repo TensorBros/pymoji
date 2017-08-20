@@ -1,3 +1,4 @@
+"""Shared constants."""
 import os
 
 
@@ -12,6 +13,9 @@ OUTPUT_PATH = os.path.join(OUTPUT_DIR, 'face-input-output.jpg')
 
 # Google App Engine
 PROJECT_ID = 'pymoji-176318'
+
+# Face detection limit
+MAX_RESULTS = 20
 
 # Google Vision Likelihood
 # https://cloud.google.com/vision/docs/reference/rest/v1/images/annotate#likelihood
