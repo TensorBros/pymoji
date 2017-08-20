@@ -1,4 +1,9 @@
-# pymoji
+# ✨📸🕶 Emojivision 🕶📸✨
+Basic Flask web application that uses the Google Vision API to replace faces with emoji.
+- http://tensorbros.com
+- https://circleci.com/gh/TensorBros/pymoji
+- https://console.cloud.google.com/home/dashboard?project=pymoji-176318
+- https://app.google.stackdriver.com/?project=pymoji-176318
 
 
 ## Install
