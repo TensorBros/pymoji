@@ -25,4 +25,4 @@ def test_main():
     image = Image.open(out_file)
     pixels = image.getdata()
     unnatural_face_yellow = sum(1 for (r, g, b) in pixels if r == 251 and g == 200 and b == 83)
-    assert unnatural_face_yellow > 10
+    assert unnatural_face_yellow > 4
