@@ -1,3 +1,4 @@
+"""Initializes and configures the Emojivision web app."""
 from datetime import datetime
 import logging
 import os
@@ -10,24 +11,27 @@ from pymoji.constants import OUTPUT_PATH, PROJECT_ID, TEMP_FILENAME, TEMP_PATH
 from pymoji.faces import main
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'so-so-secret' # change this
+APP = Flask(__name__)
+APP.config['SECRET_KEY'] = 'so-so-secret' # change this
 # IMPORTANT: be extremely careful with config['TRAP_HTTP_EXCEPTIONS']
 # Setting to True will break Google App Engine load balancers!!!
 # (this probably has to do with GAE expecting a 404 at /_ah/healthcheck)
 
 # Configure logging
-if not app.testing:
-    client = google.cloud.logging.Client(project=PROJECT_ID)
+if not APP.testing:
+    LOGGER = google.cloud.logging.Client(project=PROJECT_ID)
     # Attaches a Google Stackdriver logging handler to the root logger
-    client.setup_logging(logging.INFO)
+    LOGGER.setup_logging(logging.INFO)
 
 
-@app.after_request
+@APP.after_request
 def after_request(response):
+    """Standard Flask post-request hook."""
+
     # Quick and dirty hack to wipe out caching for now
     response.headers['Last-Modified'] = datetime.now()
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, '\
+        'pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
 
@@ -38,21 +42,25 @@ def after_request(response):
     return response
 
 
-@app.route('/emojivision')
+@APP.route('/emojivision')
 def emojivision():
+    """Handles the results page."""
     input_image_url = url_for('static', filename=TEMP_FILENAME)
     output_image_url = None
 
     if os.path.isfile(OUTPUT_PATH):
         output_image_url = url_for('static', filename='gen/face-input-output.jpg')
 
-    return render_template('result.html',
+    return render_template(
+        'result.html',
         input_image_url=input_image_url,
-        output_image_url=output_image_url)
+        output_image_url=output_image_url
+    )
 
 
-@app.route('/', methods=['GET', 'POST'])
+@APP.route('/', methods=['GET', 'POST'])
 def index():
+    """Handles the index page."""
     if request.method == 'POST':
         # check if the post request has an image
         if 'image' not in request.files:
@@ -73,13 +81,14 @@ def index():
     return render_template("form.html")
 
 
-@app.route("/robots.txt")
+@APP.route("/robots.txt")
 def robots_txt():
+    """Keeps the Robot Parade at bay."""
     return "User-agent: *\nDisallow: /\n"
 
 
-@app.errorhandler(500)
-def server_error(e):
+@APP.errorhandler(500)
+def server_error(error):
     """Error handler that reports exceptions to Stackdriver Error Reporting.
 
     Note that this is only used iff DEBUG=False
@@ -91,4 +100,4 @@ def server_error(e):
     return """
     An internal error occurred: <pre>{}</pre>
     See logs for full stacktrace.
-    """.format(e), 500
+    """.format(error), 500
