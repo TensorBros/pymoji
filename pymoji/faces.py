@@ -53,6 +53,8 @@ def detect_face(input_content=None, input_source=None):
 def replace_faces(input_image, faces, output_image):
     """Replaces all faces with emoji, then saves the result.
 
+    http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
+
     Args:
         input_image: a filename, path, or binary stream containing the original
             image with the faces.
