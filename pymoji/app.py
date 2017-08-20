@@ -83,7 +83,8 @@ def index():
                     input_image_url = save_to_cloud(input_image, image.filename, image.content_type)
                 with open(OUTPUT_PATH, 'rb') as output_image:
                     output_filename = generate_output_name(image.filename)
-                    output_image_url = save_to_cloud(output_image, output_filename, image.content_type)
+                    output_image_url = save_to_cloud(output_image, output_filename,
+                        image.content_type)
 
             return redirect(url_for('emojivision',
                 input_image_url=input_image_url,
