@@ -6,6 +6,20 @@ import PIL
 from pymoji.constants import OUTPUT_DIR
 
 
+def generate_output_name(input_image):
+    """Makes a filename to save the result image into.
+
+    Args:
+        input_image: a filname string, e.g. "face-input.jpg"
+
+    Returns:
+        a filename string, e.g. "face-input-output.jpg"
+    """
+    filename = input_image.split('.')[-2]
+    extension = input_image.split('.')[-1]
+    return filename + "-output." + extension
+
+
 def generate_output_path(input_image):
     """Makes a path to save the result image into.
 
@@ -15,9 +29,7 @@ def generate_output_path(input_image):
     Returns:
         "pymoji/static/gen/face-input-output.jpg"
     """
-    filename = input_image.split('.')[-2]
-    extension = input_image.split('.')[-1]
-    output_image = filename + "-output." + extension
+    output_image = generate_output_name(input_image)
     return os.path.join(OUTPUT_DIR, output_image)
 
 
