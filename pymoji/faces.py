@@ -5,7 +5,7 @@ from google.cloud import vision
 from google.cloud.vision import types
 from PIL import Image
 
-from pymoji.constants import EMOJI_DIR, OUTPUT_DIR
+from pymoji.constants import EMOJI_DIR, LIKELY, MAX_RESULTS, OUTPUT_DIR, UNLIKELY, VERY_UNLIKELY
 
 
 def detect_face(face_file):
@@ -85,17 +85,17 @@ def render_emoji(image, face):
     joy_3_emoji_code = "1f606"
 
     # super crude sentiment logic
-    if face.sorrow_likelihood > 1:
+    if face.sorrow_likelihood > VERY_UNLIKELY:
         emoji_code = sorrow_emoji_code
-    elif face.anger_likelihood > 1:
+    elif face.anger_likelihood > VERY_UNLIKELY:
         emoji_code = anger_emoji_code
-    elif face.surprise_likelihood > 1:
+    elif face.surprise_likelihood > VERY_UNLIKELY:
         emoji_code = surprise_emoji_code
-    elif face.joy_likelihood > 4:
+    elif face.joy_likelihood > LIKELY:
         emoji_code = joy_3_emoji_code
-    elif face.joy_likelihood > 2:
+    elif face.joy_likelihood > UNLIKELY:
         emoji_code = joy_2_emoji_code
-    elif face.joy_likelihood > 1:
+    elif face.joy_likelihood > VERY_UNLIKELY:
         emoji_code = joy_1_emoji_code
 
     # scale and render emoji over bounding box
