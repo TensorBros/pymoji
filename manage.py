@@ -5,8 +5,8 @@ import os
 
 from flask_script import Manager
 
-from pymoji import faces, process_folder
 from pymoji.app import app
+from pymoji import faces, utils
 from pymoji.constants import OUTPUT_DIR, STATIC_DIR
 
 
@@ -26,7 +26,7 @@ def runface(input_image=None, output_image=None):
     if output_image:
         output_path = os.path.join(OUTPUT_DIR, output_image)
     else:
-        output_path = process_folder.generate_output_path(input_image)
+        output_path = utils.generate_output_path(input_image)
 
     faces.main(input_path, output_path)
 
@@ -38,7 +38,7 @@ def runfolder(directory=None):
     Args:
         directory: path to directory to process images in.
     """
-    process_folder.process_folder(directory)
+    utils.process_folder(directory, faces.main)
 
 
 if __name__ == "__main__":
