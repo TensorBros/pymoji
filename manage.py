@@ -5,12 +5,12 @@ import os
 
 from flask_script import Manager
 
-from pymoji.app import app
 from pymoji import faces, utils
+from pymoji.app import APP
 from pymoji.constants import OUTPUT_DIR, STATIC_DIR
 
 
-MANAGER = Manager(app)
+MANAGER = Manager(APP)
 
 
 @MANAGER.command

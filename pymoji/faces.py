@@ -50,25 +50,26 @@ def detect_face(input_content=None, input_source=None):
         }).face_annotations # pylint: disable=no-member
 
 
-def replace_faces(image, faces, output_filename):
-    """Replaces all faces with emoji, then saves to output_filename.
+def replace_faces(input_image, faces, output_image):
+    """Replaces all faces with emoji, then saves the result.
 
     Args:
-        image: a file containing the image with the faces.
-        faces: a list of faces found in the file. This should be in the format
-            returned by the Vision API.
-        output_filename: the name of the image file to be created, where the
-            faces have polygons drawn around them.
+        input_image: a filename, path, or binary stream containing the original
+            image with the faces.
+        faces: a list of faces detected in the image. This should be in the
+            format returned by the Google Cloud Vision API.
+        output_image: a filename, path, or binary stream to write the resulting
+            emojivision image to.
     """
-    im = Image.open(image)
+    emoji_image = Image.open(input_image)
 
     for face in faces:
-        render_emoji(im, face)
+        render_emoji(emoji_image, face)
 
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    im.save(output_filename)
+    emoji_image.save(output_image)
 
 
 def open_emoji(code):
@@ -135,11 +136,18 @@ def render_emoji(image, face):
 
 
 def main(input_filename, output_filename):
+    """Processes the image at the specified input path and writes the
+    result to the specified output path.
+
+    Args:
+        input_filename: path to source image file
+        output_filename: path to destination image file
+    """
     with open(input_filename, 'rb') as image:
-        faces = detect_face(image)
+        faces = detect_face(input_content=image)
         print('Found {} face{}'.format(
             len(faces), '' if len(faces) == 1 else 's'))
-        if len(faces) > 0:
+        if faces:
             print('Writing to file {}'.format(output_filename))
             # Reset the file pointer, so we can read the file again
             image.seek(0)

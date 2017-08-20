@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
-from pymoji.app import app
+"""see pymoji/app.py"""
+from pymoji.app import APP
 
 
 def test_index():
-    app.testing = True
-    client = app.test_client()
+    """tests pymoji.app.index"""
+    APP.testing = True
+    client = APP.test_client()
 
-    r = client.get('/')
-    assert r.status_code == 200
-    assert u'✨📸🕶✨' in r.data.decode('utf-8')
+    response = client.get('/')
+    assert response.status_code == 200
+    assert u'✨📸🕶✨' in response.data.decode('utf-8')
