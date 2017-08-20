@@ -1,7 +1,6 @@
 """Initializes and configures the Emojivision web app."""
 from datetime import datetime
 import logging
-import os
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from google.cloud import error_reporting
@@ -9,6 +8,7 @@ import google.cloud.logging
 
 from pymoji.constants import OUTPUT_PATH, PROJECT_ID, TEMP_FILENAME, TEMP_PATH
 from pymoji.faces import main
+from pymoji.utils import generate_output_name, save_to_cloud
 
 
 APP = Flask(__name__)
@@ -45,12 +45,8 @@ def after_request(response):
 @APP.route('/emojivision')
 def emojivision():
     """Handles the results page."""
-    input_image_url = url_for('static', filename=TEMP_FILENAME)
-    output_image_url = None
-
-    if os.path.isfile(OUTPUT_PATH):
-        output_image_url = url_for('static', filename='gen/face-input-output.jpg')
-
+    input_image_url = request.args.get('input_image_url')
+    output_image_url = request.args.get('output_image_url')
     return render_template(
         'result.html',
         input_image_url=input_image_url,
@@ -71,12 +67,29 @@ def index():
         if image.filename == '':
             flash('No selected file')
             return redirect(request.url)
+
+        # handle valid files
         if image and image.filename:
+            # default urls for test image
+            input_image_url = url_for('static', filename=TEMP_FILENAME)
+            output_image_url = url_for('static', filename='gen/face-input-output.jpg')
             image.save(TEMP_PATH)
             image.close()
-        main(TEMP_PATH, OUTPUT_PATH)
+            main(TEMP_PATH, OUTPUT_PATH)
 
-        return redirect(url_for('emojivision'))
+            # upload images to google cloud storage
+            if not APP.testing:
+                with open(TEMP_PATH, 'rb') as input_image:
+                    input_image_url = save_to_cloud(input_image, image.filename, image.content_type)
+                with open(OUTPUT_PATH, 'rb') as output_image:
+                    output_filename = generate_output_name(image.filename)
+                    output_image_url = save_to_cloud(output_image, output_filename, image.content_type)
+
+            return redirect(url_for('emojivision',
+                input_image_url=input_image_url,
+                output_image_url=output_image_url))
+
+        return redirect(request.url)
 
     return render_template("form.html")
 
