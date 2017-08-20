@@ -6,13 +6,13 @@
 ### 🍺 OS Dependencies
 
 - Install and update [Homebrew](https://brew.sh/) if necessary
-```bash
+```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew update
 brew doctor
 ```
 - Install dependencies
-```bash
+```
 brew install coreutils pyenv pyenv-virtualenv
 ```
 - Add required shims to your bash profile:
@@ -24,10 +24,10 @@ eval "$(pyenv virtualenv-init -)"
 
 #### Google Cloud Platform Deployment Dependencies
 - If deploying via Google Cloud
-```bash
+```
 brew cask install google-cloud-sdk
-cd pymoji
-./gcloud init
+cd <project-dir>
+./gc init
 # enter 'pymoji-176318' for project
 ```
 
@@ -35,17 +35,17 @@ cd pymoji
 
 - Snake menagerie tamed via [pyenv](https://github.com/pyenv/) and [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv)
 - Install versions of Python if necessary
-```bash
+```
 pyenv install 2.7.13 # necessary for google cloud sdk
 pyenv install 3.5.3 # necessary for pymoji
 ```
 - Create new virtual environment
-```bash
+```
 pyenv virtualenv 3.5.3 pymoji
 ```
 - Install dependencies
-```bash
-cd pymoji
+```
+cd <project-dir>
 echo 'pymoji' > .python-version
 pip install --upgrade pip setuptools
 pip install -r requirements.txt
@@ -54,8 +54,8 @@ pip install -r requirements.txt
 ### Git Hooks
 
 - Auomatically run linters before pushing:
-```bash
-cd pymoji
+```
+cd <project-dir>
 ./git-pre-push.sh
 ```
 
@@ -65,28 +65,70 @@ cd pymoji
   - [pylint extension](https://packagecontrol.io/packages/SublimeLinter-pylint)
   - [eslint extension](https://packagecontrol.io/packages/SublimeLinter-contrib-eslint)
   - IMPORTANT: because reasons, you must also do some global setup:
-  ```bash
+  ```
   pyenv global 3.5.3
   cd ~ # go somewhere that falls through to global environment
   pip install pylint pylint-flask
   ```
 
 
-## Run Local
+## Run Local Webserver
 
-- Open a terminal and run the dev server:
-```bash
-cd pymoji
-python manage.py runserver
+- Open a terminal and run the dev webserver:
+```
+cd <project-dir>
+./cli runserver
 ```
 
 - Open a browser and navigate to http://localhost:5000
 
 
+## Run Local Scripts
+
+- HALP.
+```
+cd <project-dir>
+./cli -?
+```
+
+- Wat do `runserver`?
+```
+cd <project-dir>
+./cli runserver -?
+```
+
+- Emojivision a file:
+```
+cd <project-dir>
+./cli runface -i face-input.jpg
+```
+```
+Found 1 face
+Writing to file pymoji/static/gen/face-input-output.jpg
+```
+
+- Emojivision a directory:
+```
+cd <project-dir>
+./cli runfolder -d pymoji/static/
+```
+```
+processing angry
+Found 1 face
+Writing to file pymoji/static/gen/angry-output.jpg
+processing composite
+Found 5 faces
+Writing to file pymoji/static/gen/composite-output.jpg
+processing cry
+...
+```
+
+
 ## Deploy to Cloud (Manual)
 
-```bash
-./gcloud app deploy --project pymoji-176318
+```
+cd <project-dir>
+./gc app deploy --project pymoji-176318
 ```
 
 
