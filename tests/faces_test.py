@@ -3,8 +3,8 @@ import os
 from PIL import Image
 
 from pymoji.constants import STATIC_DIR
-from pymoji.process_folder import generate_output_path
 from pymoji.faces import main
+from pymoji.utils import generate_output_path
 
 
 def test_main():
