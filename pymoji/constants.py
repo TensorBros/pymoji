@@ -9,3 +9,6 @@ OUTPUT_DIR = os.path.join(STATIC_DIR, 'gen')
 TEMP_FILENAME = 'face-input.jpg'
 TEMP_PATH = os.path.join(STATIC_DIR, TEMP_FILENAME)
 OUTPUT_PATH = os.path.join(OUTPUT_DIR, 'face-input-output.jpg')
+
+# Google App Engine
+PROJECT_ID = 'pymoji-176318'

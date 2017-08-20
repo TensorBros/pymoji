@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>✨🕶 Emojivision 🕶✨</h3>
+
+{% if input_image_url %}
+<div class="media">
+  <div class="media-left">
+      <img src="{{input_image_url}}" alt="input image" width="400">
+  </div>
+</div>
+{% else %}
+<p>🚧 No 📸 found! 🚧</p>
+{% endif %}
+
+{% if output_image_url %}
+<div class="media">
+  <div class="media-left">
+      <img src="{{output_image_url}}" alt="output image" width="400">
+  </div>
+</div>
+{% else %}
+<p>🚧 No 📸 found! 🚧</p>
+{% endif %}
+
+{% endblock %}
