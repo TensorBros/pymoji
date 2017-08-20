@@ -1,9 +1,42 @@
 """Common utility functions."""
 import os
 
+from google.cloud import storage
 import PIL
 
-from pymoji.constants import OUTPUT_DIR
+from pymoji.constants import OUTPUT_DIR, PROJECT_ID
+
+
+def save_to_cloud(binary_file, filename, content_type):
+    """Saves a binary file to the Google Storage Cloud and returns the new
+    public URL.
+
+    https://cloud.google.com/appengine/docs/flexible/python/using-cloud-storage
+
+    Args:
+        binary_file: a binary file object with read access
+        filename: the desired destination filename
+        content_type: MIME content type
+
+    Returns:
+        a publicly accessible URL string
+    """
+    # Create a Cloud Storage client.
+    gcs = storage.Client(project=PROJECT_ID)
+
+    # Get the bucket that the file will be uploaded to.
+    bucket = gcs.get_bucket(PROJECT_ID)
+
+    # Create a new blob and upload the file's content.
+    blob = bucket.blob(filename)
+
+    blob.upload_from_string(
+        binary_file.read(),
+        content_type=content_type
+    )
+
+    # The public URL can be used to directly access the uploaded file via HTTP.
+    return blob.public_url
 
 
 def generate_output_name(input_image):
