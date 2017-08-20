@@ -3,12 +3,12 @@ import os
 import PIL
 
 from pymoji import faces
-from pymoji.app import OUTPUT_DIR
+from pymoji.constants import OUTPUT_DIR
 
 
 #TODO put this into a helper/utilities file if it's used by both process_folder and faces.py
 def generate_output_path(input_image):
-    """Makes a path to save the result image into. Makes the dir if it ain't there.
+    """Makes a path to save the result image into.
 
     Args:
         input_image: A string, eg "face-input.jpg"
@@ -16,9 +16,6 @@ def generate_output_path(input_image):
     Returns:
         "pymoji/static/gen/face-input-output.jpg"
     """
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-
     filename = input_image.split('.')[-2]
     extension = input_image.split('.')[-1]
     output_image = filename + "-output." + extension

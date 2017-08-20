@@ -5,8 +5,9 @@ import os
 
 from flask_script import Manager
 
-from pymoji.app import app, RESOURCES
 from pymoji import faces, process_folder
+from pymoji.app import app
+from pymoji.constants import OUTPUT_DIR, STATIC_DIR
 
 
 MANAGER = Manager(app)
@@ -20,10 +21,10 @@ def runface(input_image=None, output_image=None):
         input_image: name of image resource file to process faces in.
         output_image: name of output file to write modified image to. (optional)
     """
-    input_path = os.path.join(RESOURCES, input_image)
+    input_path = os.path.join(STATIC_DIR, input_image)
 
     if output_image:
-        output_path = os.path.join(RESOURCES, output_image)
+        output_path = os.path.join(OUTPUT_DIR, output_image)
     else:
         output_path = process_folder.generate_output_path(input_image)
 

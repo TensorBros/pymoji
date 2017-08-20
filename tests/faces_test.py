@@ -2,14 +2,14 @@ import os
 
 from PIL import Image
 
+from pymoji.constants import STATIC_DIR
 from pymoji.process_folder import generate_output_path
 from pymoji.faces import main
-from pymoji.app import RESOURCES
 
 
 def test_main():
     out_file = generate_output_path('face-input.jpg')
-    in_file = os.path.join(RESOURCES, 'face-input.jpg')
+    in_file = os.path.join(STATIC_DIR, 'face-input.jpg')
 
     # Make sure there isn't already a green box
     im = Image.open(in_file)
