@@ -5,10 +5,7 @@ from google.cloud import vision
 from google.cloud.vision import types
 from PIL import Image
 
-from pymoji.app import RESOURCES
-
-
-EMOJI_DIR = os.path.join(RESOURCES, 'emoji')
+from pymoji.constants import EMOJI_DIR, OUTPUT_DIR
 
 
 def detect_face(face_file):
@@ -40,6 +37,9 @@ def replace_faces(image, faces, output_filename):
 
     for face in faces:
         render_emoji(im, face)
+
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
     im.save(output_filename)
 

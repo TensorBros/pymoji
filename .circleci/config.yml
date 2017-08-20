@@ -61,8 +61,7 @@ jobs:
           name: run linters
           command: |
             source venv/bin/activate
-            pylint manage.py
-            pylint pymoji
+            pylint manage.py pymoji
 
       # Run tests and save results
       - run:
@@ -77,6 +76,7 @@ jobs:
 
       # Deploy successful builds on master to Google App Engine
       # https://circleci.com/docs/2.0/deployment_integrations/
+      # https://cloud.google.com/sdk/gcloud/reference/app/deploy
       - deploy:
           name: maybe deploy
           command: |
@@ -85,7 +85,7 @@ jobs:
               gcloud --quiet components update
               gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
               gcloud --quiet config set project $GCLOUD_PROJECT_ID
-              gcloud --quiet app deploy --promote
+              gcloud --quiet app deploy --promote --stop-previous-version
             else
               echo 'skipping deployment for non-master branch'
             fi
