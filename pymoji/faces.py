@@ -113,6 +113,7 @@ def render_emoji(image, face):
     joy_1_emoji_code = "1f601"
     joy_2_emoji_code = "1f604"
     joy_3_emoji_code = "1f606"
+    headwear_emoji_code = "1f920"
 
     # super crude sentiment logic
     if face.sorrow_likelihood > VERY_UNLIKELY:
@@ -123,6 +124,8 @@ def render_emoji(image, face):
         emoji_code = surprise_emoji_code
     elif face.joy_likelihood > LIKELY:
         emoji_code = joy_3_emoji_code
+    elif face.headwear_likelihood > VERY_UNLIKELY:
+        emoji_code = headwear_emoji_code
     elif face.joy_likelihood > UNLIKELY:
         emoji_code = joy_2_emoji_code
     elif face.joy_likelihood > VERY_UNLIKELY:
