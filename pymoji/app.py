@@ -2,6 +2,7 @@
 from datetime import datetime
 import logging
 import os
+import time
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from google.cloud import error_reporting
@@ -73,7 +74,8 @@ def index():
 
         # handle valid files
         if image and allowed_file(image.filename):
-            input_filename = secure_filename(image.filename)
+            timestamp = int(round(time.time() * 1000))
+            input_filename = str(timestamp) + '_' + secure_filename(image.filename)
             output_filename = generate_output_name(input_filename)
             local_output_path = os.path.join(OUTPUT_DIR, output_filename)
             input_image_url = None
