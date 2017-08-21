@@ -6,8 +6,9 @@
 
 <form method="POST" enctype="multipart/form-data">
   <div class="form-group">
-    <label for="image">PNG or JPG < 10MB</label>
-    <input type="file" name="image" id="image" class="form-control"/>
+    <label for="image">image < 10MB</label>
+    <input type="file" name="image" id="image" class="form-control"
+      accept="image/*" required="true" />
   </div>
   <button type="submit" value="Upload" class="btn btn-success">🚀 Launch 🚀</button>
 </form>
