@@ -23,3 +23,6 @@ UNLIKELY = 2
 POSSIBLE = 3
 LIKELY = 4
 VERY_LIKELY = 5
+
+EMOJI_CDN_PATH = 'https://cdn.jsdelivr.net/emojione/assets/3.1/png/128/'
+# backup path: 'https://api.emojione.com/emoji/1f62d/download/128/'
