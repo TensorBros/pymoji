@@ -18,6 +18,7 @@ APP.config['SECRET_KEY'] = 'so-so-secret' # change this
 # IMPORTANT: be extremely careful with config['TRAP_HTTP_EXCEPTIONS']
 # Setting to True will break Google App Engine load balancers!!!
 # (this probably has to do with GAE expecting a 404 at /_ah/healthcheck)
+APP.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB upload limit
 
 # Configure logging
 if not APP.testing:
