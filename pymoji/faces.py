@@ -12,6 +12,23 @@ from pymoji.constants import EMOJI_DIR, LIKELY, MAX_RESULTS, OUTPUT_DIR, UNLIKEL
 from pymoji.utils import save_to_cloud
 
 
+def download_image(image_uri):
+    """Downloads the image at the given URI and returns it as a PIL.Image.
+
+    http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
+
+    Args:
+        image_uri: an image uri, e.g. 'http://cdn/path/to/image.jpg'
+
+    Returns:
+        a PIL.Image of awesomeness
+    """
+    print('Downloading source image: {} ...'.format(image_uri))
+    response = requests.get(image_uri)
+    print('...download completed.')
+    return Image.open(BytesIO(response.content))
+
+
 def to_image(input_content=None, input_source=None):
     """Standardizes an input image. Pass the input as a binary stream (takes
     precedence), Google Cloud source URI, or both.
@@ -99,10 +116,7 @@ def replace_faces(faces, input_content=None, input_source=None):
     if input_content:
         output_image = Image.open(input_content)
     elif input_source:
-        print('Downloading source image: {} ...'.format(input_source))
-        response = requests.get(input_source)
-        output_image = Image.open(BytesIO(response.content))
-        print('...download completed.')
+        output_image = download_image(input_source)
 
     for face in faces:
         render_emoji(output_image, face)
