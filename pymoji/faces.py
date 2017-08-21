@@ -1,14 +1,44 @@
 """Replaces detected faces in the given image with emoji."""
+from io import BytesIO
 import os
+import requests
 
+from flask import url_for
 from google.cloud import vision
 from google.cloud.vision import types
 from PIL import Image
 
 from pymoji.constants import EMOJI_DIR, LIKELY, MAX_RESULTS, OUTPUT_DIR, UNLIKELY, VERY_UNLIKELY
+from pymoji.utils import save_to_cloud
 
 
-def detect_face(input_content=None, input_source=None):
+def to_image(input_content=None, input_source=None):
+    """Standardizes an input image. Pass the input as a binary stream (takes
+    precedence), Google Cloud source URI, or both.
+
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.Image
+    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.ImageSource
+
+    Args:
+        input_content: a binary stream containing an image with faces.
+        input_source: an image uri for either Google Cloud storage
+            e.g. 'gs://bucket_name/path/to/image.jpg'
+            or public http/https url
+            e.g. 'http://cdn/path/to/image.jpg'
+
+    Returns:
+        a google vision image object
+    """
+    content = None
+    source = None
+    if input_content:
+        content = input_content.read()
+    elif input_source:
+        source = types.ImageSource(image_uri=input_source) # pylint: disable=no-member
+    return types.Image(content=content, source=source) # pylint: disable=no-member
+
+
+def detect_faces(input_content=None, input_source=None):
     """Uses the Vision API to detect faces in an input image. Pass the input
     image as a binary stream (takes precedence), Google Cloud source URI,
     or both.
@@ -32,46 +62,52 @@ def detect_face(input_content=None, input_source=None):
     client = vision.ImageAnnotatorClient()
 
     # convert input image to Google Cloud Image
-    content = None
-    source = None
-    if input_content:
-        content = input_content.read()
-    elif input_source:
-        source = input_source
-    image = types.Image(content=content, source=source) # pylint: disable=no-member
+    image = to_image(input_content=input_content, input_source=input_source)
+    print('Detecting faces...')
 
     features = [{
         'type': vision.enums.Feature.Type.FACE_DETECTION,
         'max_results': MAX_RESULTS
     }]
-    return client.annotate_image({
+    faces = client.annotate_image({
         'image': image,
         'features': features
         }).face_annotations # pylint: disable=no-member
+    print('...found {} face{}.'.format(len(faces), '' if len(faces) == 1 else 's'))
+    return faces
 
 
-def replace_faces(input_image, faces, output_image):
-    """Replaces all faces with emoji, then saves the result.
+def replace_faces(faces, input_content=None, input_source=None):
+    """Replaces all given faces in the given image with emoji and returns the
+    resulting image. Pass the input image as a binary stream (takes precedence),
+    Google Cloud source URI, or both.
 
     http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
 
     Args:
-        input_image: a filename, path, or binary stream containing the original
-            image with the faces.
         faces: a list of faces detected in the image. This should be in the
             format returned by the Google Cloud Vision API.
-        output_image: a filename, path, or binary stream to write the resulting
-            emojivision image to.
+        input_content: a binary stream containing an image with faces.
+        input_source: an image uri for either Google Cloud storage
+            e.g. 'gs://bucket_name/path/to/image.jpg'
+            or public http/https url
+            e.g. 'http://cdn/path/to/image.jpg'
+
+    Returns:
+        a PIL.Image of awesomeness
     """
-    emoji_image = Image.open(input_image)
+    if input_content:
+        output_image = Image.open(input_content)
+    elif input_source:
+        print('Downloading source image: {} ...'.format(input_source))
+        response = requests.get(input_source)
+        output_image = Image.open(BytesIO(response.content))
+        print('...download completed.')
 
     for face in faces:
-        render_emoji(emoji_image, face)
+        render_emoji(output_image, face)
 
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-
-    emoji_image.save(output_image)
+    return output_image
 
 
 def open_emoji(code):
@@ -140,20 +176,51 @@ def render_emoji(image, face):
     image.paste(emoji, (top_left.x, top_left.y), emoji)
 
 
-def main(input_filename, output_filename):
+def main(input_path, output_path):
     """Processes the image at the specified input path and writes the
-    result to the specified output path.
+    result to the specified output path. CLI entrypoint.
 
     Args:
-        input_filename: path to source image file
-        output_filename: path to destination image file
+        input_path: path to source image file
+        output_path: path to destination image file
     """
-    with open(input_filename, 'rb') as image:
-        faces = detect_face(input_content=image)
-        print('Found {} face{}'.format(
-            len(faces), '' if len(faces) == 1 else 's'))
+    with open(input_path, 'rb') as input_image:
+        faces = detect_faces(input_content=input_image)
+
         if faces:
-            print('Writing to file {}'.format(output_filename))
-            # Reset the file pointer, so we can read the file again
-            image.seek(0)
-            replace_faces(image, faces, output_filename)
+            input_image.seek(0) # Reset the file pointer, so we can read the file again
+            output_image = replace_faces(faces, input_content=input_image)
+
+            print('Saving to file: {}'.format(output_path))
+            if not os.path.exists(OUTPUT_DIR):
+                os.makedirs(OUTPUT_DIR)
+            output_image.save(output_path)
+
+
+def process_local(image, input_filename, output_filename, local_output_path):
+    """Entrypoint called by local dev server when APP.testing == True."""
+    local_input_path = os.path.join(OUTPUT_DIR, input_filename)
+    image.save(local_input_path)
+    image.close()
+    input_image_url = url_for('static', filename='gen/' + input_filename)
+    main(local_input_path, local_output_path)
+    output_image_url = url_for('static', filename='gen/' + output_filename)
+    return (input_image_url, output_image_url)
+
+
+def process_cloud(image, input_filename, output_filename, local_output_path):
+    """Google Cloud Storage based entrypoint called by server when
+    APP.testing == False."""
+    input_image_url = save_to_cloud(image, input_filename, image.content_type)
+    output_image_url = input_image_url
+    faces = detect_faces(input_source=input_image_url)
+    if faces:
+        image.seek(0) # Reset the file pointer, so we can read the file again
+        output_image = replace_faces(faces, input_content=image)
+        # export image and upload result
+        output_image.save(local_output_path)
+        with open(local_output_path, 'rb') as output_image:
+            output_image_url = save_to_cloud(output_image, output_filename,
+                image.content_type)
+        os.remove(local_output_path) # clean up cruft on webserver
+    return (input_image_url, output_image_url)
