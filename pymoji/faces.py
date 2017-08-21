@@ -8,7 +8,8 @@ from google.cloud import vision
 from google.cloud.vision import types
 from PIL import Image
 
-from pymoji.constants import EMOJI_DIR, LIKELY, MAX_RESULTS, OUTPUT_DIR, UNLIKELY, VERY_UNLIKELY
+from pymoji.constants import EMOJI_CDN_PATH, MAX_RESULTS, OUTPUT_DIR
+from pymoji.constants import LIKELY, UNLIKELY, VERY_UNLIKELY
 from pymoji.utils import save_to_cloud
 
 
@@ -124,18 +125,26 @@ def replace_faces(faces, input_content=None, input_source=None):
     return output_image
 
 
-def open_emoji(code):
-    """Generates a PIL.Image from the specified emoji code.
-    All image files are 128x128 .pngs from https://www.emojione.com/emoji/v3
+EMOJI = {} # cache
+
+def get_emoji(code, width, height):
+    """Returns the emoji for the given emoji code as a RGBA PIL.Image scaled
+    to the given width and height. Maintains a cache of original templates.
+
+    Original emoji image files are 128x128 PNGs from https://www.emojione.com/emoji/v3
 
     Args:
         code: a string containing the code for the desired emoji.
 
     Returns:
-        a PIL.Image of the emoji.
+        a scaled RGBA PIL.Image of the emoji.
     """
-    path = os.path.join(EMOJI_DIR, code + ".png")
-    return Image.open(path).convert('RGBA')
+    if code not in EMOJI:
+        # handle cache miss
+        emoji_url = EMOJI_CDN_PATH + code + '.png'
+        emoji = download_image(emoji_url).convert('RGBA')
+        EMOJI[code] = emoji
+    return EMOJI[code].resize((width, height), resample=0)
 
 
 def render_emoji(image, face):
@@ -186,7 +195,7 @@ def render_emoji(image, face):
     bottom_right = face.bounding_poly.vertices[2]
     width = (bottom_right.x - top_left.x)
     height = (bottom_right.y - top_left.y)
-    emoji = open_emoji(emoji_code).resize((width, height), resample=0)
+    emoji = get_emoji(emoji_code, width, height)
     image.paste(emoji, (top_left.x, top_left.y), emoji)
 
 
