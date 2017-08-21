@@ -1,14 +1,16 @@
 """Initializes and configures the Emojivision web app."""
 from datetime import datetime
 import logging
+import os
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from google.cloud import error_reporting
 import google.cloud.logging
+from werkzeug.utils import secure_filename
 
-from pymoji.constants import OUTPUT_PATH, PROJECT_ID, TEMP_FILENAME, TEMP_PATH
-from pymoji.faces import main
-from pymoji.utils import generate_output_name, save_to_cloud
+from pymoji.constants import OUTPUT_DIR, PROJECT_ID
+from pymoji.faces import process_cloud, process_local
+from pymoji.utils import allowed_file, generate_output_name
 
 
 APP = Flask(__name__)
@@ -69,22 +71,19 @@ def index():
             return redirect(request.url)
 
         # handle valid files
-        if image and image.filename:
-            # default urls for test image
-            input_image_url = url_for('static', filename=TEMP_FILENAME)
-            output_image_url = url_for('static', filename='gen/face-input-output.jpg')
-            image.save(TEMP_PATH)
-            image.close()
-            main(TEMP_PATH, OUTPUT_PATH)
+        if image and allowed_file(image.filename):
+            input_filename = secure_filename(image.filename)
+            output_filename = generate_output_name(input_filename)
+            local_output_path = os.path.join(OUTPUT_DIR, output_filename)
+            input_image_url = None
+            output_image_url = None
 
-            # upload images to google cloud storage
-            if not APP.testing:
-                with open(TEMP_PATH, 'rb') as input_image:
-                    input_image_url = save_to_cloud(input_image, image.filename, image.content_type)
-                with open(OUTPUT_PATH, 'rb') as output_image:
-                    output_filename = generate_output_name(image.filename)
-                    output_image_url = save_to_cloud(output_image, output_filename,
-                        image.content_type)
+            if APP.testing:
+                (input_image_url, output_image_url) = process_local(image, input_filename,
+                    output_filename, local_output_path)
+            else:
+                (input_image_url, output_image_url) = process_cloud(image, input_filename,
+                    output_filename, local_output_path)
 
             return redirect(url_for('emojivision',
                 input_image_url=input_image_url,
