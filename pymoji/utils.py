@@ -4,7 +4,22 @@ import os
 from google.cloud import storage
 import PIL
 
-from pymoji.constants import OUTPUT_DIR, PROJECT_ID
+from pymoji.constants import ALLOWED_EXTENSIONS, OUTPUT_DIR, PROJECT_ID
+
+
+def allowed_file(filename):
+    """Checks if the given filename matches the allowed extensions.
+
+    http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
+
+    Args:
+        filename: a string.
+
+    Result:
+        True iff the filename is allowed.
+    """
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def save_to_cloud(binary_file, filename, content_type):
@@ -21,6 +36,7 @@ def save_to_cloud(binary_file, filename, content_type):
     Returns:
         a publicly accessible URL string
     """
+    print('Uploading to Google Cloud: {} ...'.format(filename))
     # Create a Cloud Storage client.
     gcs = storage.Client(project=PROJECT_ID)
 
@@ -35,6 +51,7 @@ def save_to_cloud(binary_file, filename, content_type):
         content_type=content_type
     )
 
+    print('...upload completed.')
     # The public URL can be used to directly access the uploaded file via HTTP.
     return blob.public_url
 
