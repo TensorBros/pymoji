@@ -9,7 +9,8 @@ from google.cloud.vision import types
 from PIL import Image
 
 from pymoji.constants import EMOJI_CDN_PATH, MAX_RESULTS, OUTPUT_DIR
-from pymoji.constants import LIKELY, UNLIKELY, VERY_UNLIKELY
+from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
+
 from pymoji.utils import save_to_cloud
 
 
@@ -154,41 +155,79 @@ def render_emoji(image, face):
         image: a PIL.Image
         face: a face object in the format returned by the Vision API.
     """
+    sorrow_emoji = [
+        "1f641", # slightly frowning face
+        #"2639", # frowning face
+        "1f61f", # worried face
+        "1f61e", # disappointed face
+        "1f622", # crying face
+        # "1f62d", # loudly crying face
+    ]
+    anger_emoji = [
+        "1f610", # neutral face
+        "1f610", # neutral face
+        "1f620", # angry face
+        "1f620", # angry face
+        # "1f621", # pouting face
+        # "1f624", # face with steam from nose
+        # "1f92c", # face with symbols over mouth
+    ]
+    surprise_emoji = [
+        "1f62f", # hushed face
+        "1f62e", # face with open mouth
+        # "1f627", # anguished face
+        "1f632", # astonished face
+        "1f628", # fearful face
+        # "1f631", # face screaming in fear
+    ]
+    joy_emoji = [
+        # "1f642", # slightly smiling face
+        "1f60c", # relieved face
+        # "263a", # smiling face
+        # "1f60a", # smiling face with smiling eyes & rosy cheeks
+        # "1f600", # grinning face
+        "1f603", # smiling face with open mouth
+        "1f601", # grinning face with smiling eyes
+        # "1f604", # smiling face with open mouth & smiling eyes
+        "1f606", # smiling face with open mouth & closed eyes
+        # "1f602", # face with tears of joy
+        # "1f923", # rolling on the floor laughing
+    ]
+    # MISC
+    # "1f615" # confused face
+    # "1f913" # nerd face
+    # "1f60e" # smiling face with sunglasses
+    # "1f61b" # face with stuck-out tongue
+    # "1f60d" # smiling face with heart-eyes
+    # "1f644" # face with rolling eyes
+
+    def get_code(likelihood, code_list):
+        """assumes code_list has exactly 4 codes in ascending order"""
+        if likelihood == VERY_LIKELY:
+            return code_list[3]
+        elif likelihood == LIKELY:
+            return code_list[2]
+        elif likelihood == POSSIBLE:
+            return code_list[1]
+        elif likelihood == UNLIKELY:
+            return code_list[0]
+        return "1f642" # slightly smiling face
 
     # default face that everyone starts with:
-    emoji_code = "1f642"
+    emoji_code = "1f642" # slightly smiling face
 
-    # extras:
-    # basic_smile_code = "1f642"
-    # roseycheeks_code = "1f60a"
-    # expressionless_face_code = "1f610"
-    # confused_code = "1f615"
-    # tears_code = "1f602"
-
-    # basic sentiment emoji
-    sorrow_emoji_code = "1f622"
-    anger_emoji_code = "1f620"
-    surprise_emoji_code = "1f632"
-    joy_1_emoji_code = "1f601"
-    joy_2_emoji_code = "1f604"
-    joy_3_emoji_code = "1f606"
-    headwear_emoji_code = "1f920"
-
-    # super crude sentiment logic
+    # check likelihood scores in roughly inverse-frequency order
+    # i.e. ensure that rare sorrow emoji outrank common joy emoji
     if face.sorrow_likelihood > VERY_UNLIKELY:
-        emoji_code = sorrow_emoji_code
+        emoji_code = get_code(face.sorrow_likelihood, sorrow_emoji)
     elif face.anger_likelihood > VERY_UNLIKELY:
-        emoji_code = anger_emoji_code
+        emoji_code = get_code(face.anger_likelihood, anger_emoji)
     elif face.surprise_likelihood > VERY_UNLIKELY:
-        emoji_code = surprise_emoji_code
-    elif face.joy_likelihood > LIKELY:
-        emoji_code = joy_3_emoji_code
-    elif face.headwear_likelihood > VERY_UNLIKELY:
-        emoji_code = headwear_emoji_code
-    elif face.joy_likelihood > UNLIKELY:
-        emoji_code = joy_2_emoji_code
+        emoji_code = get_code(face.surprise_likelihood, surprise_emoji)
+    elif face.headwear_likelihood > POSSIBLE:
+        emoji_code = "1f920" # cowboy hat face
     elif face.joy_likelihood > VERY_UNLIKELY:
-        emoji_code = joy_1_emoji_code
+        emoji_code = get_code(face.joy_likelihood, joy_emoji)
 
     # scale and render emoji over bounding box
     top_left = face.bounding_poly.vertices[0]
