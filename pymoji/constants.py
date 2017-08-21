@@ -14,8 +14,9 @@ OUTPUT_PATH = os.path.join(OUTPUT_DIR, 'face-input-output.jpg')
 # Google App Engine
 PROJECT_ID = 'pymoji-176318'
 
-# Face detection limit
+# Face detection params
 MAX_RESULTS = 20
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 # Google Vision Likelihood
 # https://cloud.google.com/vision/docs/reference/rest/v1/images/annotate#likelihood
