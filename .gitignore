@@ -103,6 +103,9 @@ ENV/
 # mypy
 .mypy_cache/
 
+# Pymoji image files
+# uploads (local only)
+pymoji/static/uploads/
 # generated images
 pymoji/static/gen/
 

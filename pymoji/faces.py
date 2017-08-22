@@ -6,9 +6,9 @@ from flask import url_for
 from google.cloud import vision
 from google.cloud.vision import types
 
-from pymoji.constants import MAX_RESULTS, OUTPUT_DIR
+from pymoji.constants import MAX_RESULTS, OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
-from pymoji.utils import generate_output_name, save_to_cloud
+from pymoji.utils import get_output_name, save_to_cloud
 
 
 def detect_faces(input_content=None, input_source=None):
@@ -71,7 +71,7 @@ def process_path(input_path, output_filename=None):
 
     if not output_filename:
         input_filename = os.path.basename(input_path)
-        output_filename = generate_output_name(input_filename)
+        output_filename = get_output_name(input_filename)
 
     output_path = os.path.join(OUTPUT_DIR, output_filename)
 
@@ -95,14 +95,14 @@ def process_local(image, input_filename):
         tuple containing publicly accessible URLs in the form:
             (input_image_url, output_image_url)
     """
-    local_input_path = os.path.join(OUTPUT_DIR, input_filename)
+    local_input_path = os.path.join(UPLOADS_DIR, input_filename)
     print('Saving to file: {}'.format(local_input_path))
     image.save(local_input_path)
 
-    output_filename = generate_output_name(input_filename)
+    output_filename = get_output_name(input_filename)
     process_path(local_input_path, output_filename=output_filename)
 
-    input_image_url = url_for('static', filename='gen/' + input_filename)
+    input_image_url = url_for('static', filename='uploads/' + input_filename)
     output_image_url = url_for('static', filename='gen/' + output_filename)
     return (input_image_url, output_image_url)
 
@@ -132,7 +132,7 @@ def process_cloud(image, input_filename, mime):
             image.seek(0) # Reset the file pointer, so we can read the file again
             replace_faces(image, faces, output_file)
             output_file.seek(0) # Reset the file pointer, so we can read the file again
-            output_filename = generate_output_name(input_filename)
+            output_filename = get_output_name(input_filename)
             output_image_url = save_to_cloud(output_file, output_filename, mime)
 
     return (input_image_url, output_image_url)

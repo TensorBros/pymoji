@@ -6,7 +6,7 @@ import requests
 from google.cloud import storage
 from PIL import Image
 
-from pymoji.constants import ALLOWED_EXTENSIONS, OUTPUT_DIR, PROJECT_ID
+from pymoji.constants import ALLOWED_EXTENSIONS, PROJECT_ID
 
 
 def allowed_file(filename):
@@ -76,31 +76,18 @@ def download_image(image_uri):
     return Image.open(BytesIO(response.content))
 
 
-def generate_output_name(input_image):
-    """Makes a filename to save the result image into.
+def get_output_name(input_filename):
+    """Makes an output filename based on the given input filename.
 
     Args:
-        input_image: a filname string, e.g. "face-input.jpg"
+        input_filename: a filname string, e.g. "face-input.jpg"
 
     Returns:
         a filename string, e.g. "face-input-output.jpg"
     """
-    filename = input_image.split('.')[-2]
-    extension = input_image.split('.')[-1]
+    filename = input_filename.split('.')[-2]
+    extension = input_filename.split('.')[-1]
     return filename + "-output." + extension
-
-
-def generate_output_path(input_image):
-    """Makes a path to save the result image into.
-
-    Args:
-        input_image: A string, eg "face-input.jpg"
-
-    Returns:
-        "pymoji/static/gen/face-input-output.jpg"
-    """
-    output_image = generate_output_name(input_image)
-    return os.path.join(OUTPUT_DIR, output_image)
 
 
 def process_folder(path, file_processor):
