@@ -26,3 +26,6 @@ VERY_LIKELY = 5
 
 EMOJI_CDN_PATH = 'https://cdn.jsdelivr.net/emojione/assets/3.1/png/128/'
 # backup path: 'https://api.emojione.com/emoji/1f62d/download/128/'
+
+# Google Cloud Storage
+CLOUD_ROOT = 'http://storage.googleapis.com/pymoji-176318/'
