@@ -6,7 +6,7 @@ from flask import url_for
 from google.cloud import vision
 from google.cloud.vision import types
 
-from pymoji.constants import MAX_RESULTS, OUTPUT_DIR, UPLOADS_DIR
+from pymoji.constants import MAX_RESULTS, OUTPUT_DIR, PROJECT_ID, UPLOADS_DIR
 from pymoji.emoji import replace_faces
 from pymoji.utils import get_output_name, save_to_cloud
 
@@ -124,7 +124,9 @@ def process_cloud(image, input_filename, mime):
     input_image_url = save_to_cloud(image, 'uploads/' + input_filename, mime)
     output_image_url = input_image_url
 
-    faces = detect_faces(input_source=input_image_url)
+    # gs://bucket_name/object_name
+    input_source = "gs://{}/uploads/{}".format(PROJECT_ID, input_filename)
+    faces = detect_faces(input_source=input_source)
     if faces:
         # Use a named temp file so pillow can match input file encoding
         suffix = '.' + input_filename.rsplit('.', 1)[1]
