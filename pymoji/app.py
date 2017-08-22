@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import time
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, request, send_from_directory, url_for
 from google.cloud import error_reporting
 import google.cloud.logging
 from werkzeug.utils import secure_filename
@@ -93,10 +93,16 @@ def index():
     return render_template("form.html")
 
 
+@APP.route('/favicon.ico')
+def favicon():
+    """Flex those guns!"""
+    return send_from_directory(STATIC_DIR, 'favicon.ico')
+
+
 @APP.route("/robots.txt")
 def robots_txt():
     """Keeps the Robot Parade at bay."""
-    return "User-agent: *\nDisallow: /\n"
+    return send_from_directory(STATIC_DIR, 'robots.txt')
 
 
 @APP.errorhandler(500)
