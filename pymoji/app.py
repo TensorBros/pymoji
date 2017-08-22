@@ -8,7 +8,7 @@ from google.cloud import error_reporting
 import google.cloud.logging
 from werkzeug.utils import secure_filename
 
-from pymoji.constants import CLOUD_ROOT, PROJECT_ID, STATIC_DIR
+from pymoji.constants import CLOUD_ROOT, PROJECT_ID
 from pymoji.faces import process_cloud, process_local
 from pymoji.utils import allowed_file, get_output_name
 
@@ -98,13 +98,13 @@ def index():
 @APP.route('/favicon.ico')
 def favicon():
     """Flex those guns!"""
-    return send_from_directory(STATIC_DIR, 'favicon.ico')
+    return send_from_directory('static', 'favicon.ico')
 
 
 @APP.route("/robots.txt")
 def robots_txt():
     """Keeps the Robot Parade at bay."""
-    return send_from_directory(STATIC_DIR, 'robots.txt')
+    return send_from_directory('static', 'robots.txt')
 
 
 @APP.errorhandler(500)
