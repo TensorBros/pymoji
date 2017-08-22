@@ -77,7 +77,18 @@ cd <project-dir>
   ```
 
 
-## Run Local Webserver
+## Local Environment
+
+- Make sure everything works
+```
+cd <project-dir>
+./cli build
+```
+
+### Dev Config
+- TODO
+
+### Localhost Webserver
 
 - Open a terminal and run the dev webserver:
 ```
@@ -88,7 +99,7 @@ cd <project-dir>
 - Open a browser and navigate to http://localhost:5000
 
 
-## Run Local Scripts
+### Command Line Interface
 
 - HALP.
 ```
@@ -107,33 +118,19 @@ cd <project-dir>
 cd <project-dir>
 ./cli runface pymoji/static/uploads/face-input.jpg
 ```
-```
-Found 1 face
-Writing to file pymoji/static/gen/face-input-output.jpg
-```
 
 - Emojivision a directory:
 ```
 cd <project-dir>
 ./cli rundir pymoji/static/uploads
 ```
-```
-processing angry
-Found 1 face
-Writing to file pymoji/static/gen/angry-output.jpg
-processing composite
-Found 5 faces
-Writing to file pymoji/static/gen/composite-output.jpg
-processing cry
-...
-```
 
 
-## Deploy to Cloud (Manual)
+### Deploy to Cloud (Manual)
 
 ```
 cd <project-dir>
-./gc app deploy --project pymoji-176318
+./gc app deploy --project pymoji-176318 --promote --stop-previous-version
 ```
 
 
