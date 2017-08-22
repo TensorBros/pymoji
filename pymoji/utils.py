@@ -9,6 +9,14 @@ from PIL import Image
 from pymoji.constants import ALLOWED_EXTENSIONS, PROJECT_ID
 
 
+def shell(cmd):
+    """Convenience wrapper function."""
+    print(cmd)
+    res = os.system(cmd)
+    if res:
+        raise Exception("Error in script:\n{0}".format(cmd))
+
+
 def allowed_file(filename):
     """Checks if the given filename matches the allowed extensions.
 
