@@ -48,7 +48,6 @@ def after_request(response):
 @APP.route('/emojivision/<input_filename>')
 def emojivision(input_filename):
     """Handles the results page."""
-    input_filename = input_filename or 'face-input.jpg'
     output_filename = get_output_name(input_filename)
 
     if APP.testing:
@@ -58,7 +57,6 @@ def emojivision(input_filename):
         input_image_url = CLOUD_ROOT + 'uploads/' + input_filename
         output_image_url = CLOUD_ROOT + 'gen/' + output_filename
 
-    # TODO Google Cloud Storage
     return render_template(
         'result.html',
         input_image_url=input_image_url,
