@@ -121,7 +121,7 @@ def process_cloud(image, input_filename, mime):
         tuple containing publicly accessible URLs in the form:
             (input_image_url, output_image_url)
     """
-    input_image_url = save_to_cloud(image, input_filename, mime)
+    input_image_url = save_to_cloud(image, 'uploads/' + input_filename, mime)
     output_image_url = input_image_url
 
     faces = detect_faces(input_source=input_image_url)
@@ -133,6 +133,6 @@ def process_cloud(image, input_filename, mime):
             replace_faces(image, faces, output_file)
             output_file.seek(0) # Reset the file pointer, so we can read the file again
             output_filename = get_output_name(input_filename)
-            output_image_url = save_to_cloud(output_file, output_filename, mime)
+            output_image_url = save_to_cloud(output_file, 'gen/' + output_filename, mime)
 
     return (input_image_url, output_image_url)
