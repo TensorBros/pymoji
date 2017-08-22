@@ -3,15 +3,14 @@ import os
 
 from PIL import Image
 
-from pymoji.constants import STATIC_DIR
+from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.faces import process_path
-from pymoji.utils import generate_output_path
 
 
 def test_process_path():
     """tests pymoji.faces.process_path"""
-    out_file = generate_output_path('face-input.jpg')
-    in_file = os.path.join(STATIC_DIR, 'face-input.jpg')
+    in_file = os.path.join(UPLOADS_DIR, 'face-input.jpg')
+    out_file = os.path.join(OUTPUT_DIR, 'face-input-output.jpg')
 
     # Make sure there isn't already any emoji-yellow
     image = Image.open(in_file)

@@ -5,7 +5,7 @@ import os
 # Project directory paths
 PACKAGE_DIR = 'pymoji'
 STATIC_DIR = os.path.join(PACKAGE_DIR, 'static')
-EMOJI_DIR = os.path.join(STATIC_DIR, 'emoji')
+UPLOADS_DIR = os.path.join(STATIC_DIR, 'uploads')
 OUTPUT_DIR = os.path.join(STATIC_DIR, 'gen')
 
 # Google App Engine
