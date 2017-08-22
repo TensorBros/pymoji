@@ -8,9 +8,9 @@ from google.cloud import error_reporting
 import google.cloud.logging
 from werkzeug.utils import secure_filename
 
-from pymoji.constants import PROJECT_ID
+from pymoji.constants import CLOUD_ROOT, PROJECT_ID, STATIC_DIR
 from pymoji.faces import process_cloud, process_local
-from pymoji.utils import allowed_file
+from pymoji.utils import allowed_file, get_output_name
 
 
 APP = Flask(__name__)
@@ -45,11 +45,20 @@ def after_request(response):
     return response
 
 
-@APP.route('/emojivision')
-def emojivision():
+@APP.route('/emojivision/<input_filename>')
+def emojivision(input_filename):
     """Handles the results page."""
-    input_image_url = request.args.get('input_image_url')
-    output_image_url = request.args.get('output_image_url')
+    input_filename = input_filename or 'face-input.jpg'
+    output_filename = get_output_name(input_filename)
+
+    if APP.testing:
+        input_image_url = url_for('static', filename='uploads/' + input_filename)
+        output_image_url = url_for('static', filename='gen/' + output_filename)
+    else:
+        input_image_url = CLOUD_ROOT + 'uploads/' + input_filename
+        output_image_url = CLOUD_ROOT + 'gen/' + output_filename
+
+    # TODO Google Cloud Storage
     return render_template(
         'result.html',
         input_image_url=input_image_url,
@@ -75,18 +84,13 @@ def index():
         if image and allowed_file(image.filename):
             timestamp = int(round(time.time() * 1000))
             input_filename = str(timestamp) + '_' + secure_filename(image.filename)
-            input_image_url = None
-            output_image_url = None
 
             if APP.testing:
-                (input_image_url, output_image_url) = process_local(image, input_filename)
+                process_local(image, input_filename)
             else:
-                (input_image_url, output_image_url) = process_cloud(image,
-                    input_filename, image.content_type)
+                process_cloud(image, input_filename, image.content_type)
 
-            return redirect(url_for('emojivision',
-                input_image_url=input_image_url,
-                output_image_url=output_image_url))
+            return redirect(url_for('emojivision', input_filename=input_filename))
 
         return redirect(request.url)
 
