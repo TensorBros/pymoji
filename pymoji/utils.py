@@ -1,8 +1,10 @@
 """Common utility functions."""
+from io import BytesIO
 import os
+import requests
 
 from google.cloud import storage
-import PIL
+from PIL import Image
 
 from pymoji.constants import ALLOWED_EXTENSIONS, OUTPUT_DIR, PROJECT_ID
 
@@ -56,6 +58,24 @@ def save_to_cloud(binary_file, filename, content_type):
     return blob.public_url
 
 
+def download_image(image_uri):
+    """Downloads the image at the given URI and returns it as a PIL.Image.
+    Only call this on trusted URIs.
+
+    http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
+
+    Args:
+        image_uri: an image uri, e.g. 'http://cdn/path/to/image.jpg'
+
+    Returns:
+        a PIL.Image
+    """
+    print('Downloading source image: {} ...'.format(image_uri))
+    response = requests.get(image_uri)
+    print('...download completed.')
+    return Image.open(BytesIO(response.content))
+
+
 def generate_output_name(input_image):
     """Makes a filename to save the result image into.
 
@@ -98,7 +118,7 @@ def process_folder(path, file_processor):
             os.path.splitext(file_name)[1] == '.JPG')
 
         if os.path.isfile(actual_file_location) and is_jpg:
-            image = PIL.Image.open(actual_file_location)
+            image = Image.open(actual_file_location)
             try:
                 image.load()
                 print('processing ' + os.path.splitext(file_name)[0])
