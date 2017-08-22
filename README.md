@@ -105,7 +105,7 @@ cd <project-dir>
 - Emojivision a file:
 ```
 cd <project-dir>
-./cli runface -i face-input.jpg
+./cli runface pymoji/static/face-input.jpg
 ```
 ```
 Found 1 face
@@ -115,7 +115,7 @@ Writing to file pymoji/static/gen/face-input-output.jpg
 - Emojivision a directory:
 ```
 cd <project-dir>
-./cli runfolder -d pymoji/static/
+./cli rundir pymoji/static/
 ```
 ```
 processing angry
