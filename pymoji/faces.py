@@ -97,7 +97,8 @@ def process_local(image, input_filename):
     """
     local_input_path = os.path.join(UPLOADS_DIR, input_filename)
     print('Saving to file: {}'.format(local_input_path))
-    image.save(local_input_path)
+    with open(local_input_path, 'wb') as input_file:
+        input_file.write(image.read())
 
     output_filename = get_output_name(input_filename)
     process_path(local_input_path, output_filename=output_filename)
