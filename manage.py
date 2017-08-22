@@ -5,10 +5,24 @@ from flask_script import Manager
 
 from pymoji.app import APP
 from pymoji.faces import process_path
-from pymoji.utils import process_folder
+from pymoji.utils import process_folder, shell
 
 
 MANAGER = Manager(APP)
+
+
+@MANAGER.command
+def build():
+    """lint + test"""
+    lint()
+    test()
+
+
+@MANAGER.command
+def lint():
+    """Runs all project linters on errythang!"""
+    shell("pylint manage.py pymoji tests")
+    #shell("static/js/node_modules/.bin/eslint --ext .js,.jsx,.json,.es6,.es static/js")
 
 
 @MANAGER.command
@@ -29,6 +43,13 @@ def rundir(directory_path):
         directory_path: path to a directory to process images in.
     """
     process_folder(directory_path, process_path)
+
+
+@MANAGER.command
+def test():
+    """Runs all project tests!"""
+    shell("pytest")
+    #shell("cd static/js && npm test")
 
 
 if __name__ == "__main__":
