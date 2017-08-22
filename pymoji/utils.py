@@ -104,27 +104,22 @@ def generate_output_path(input_image):
 
 
 def process_folder(path, file_processor):
-    """Runs the specified file processing operation on each JPG in
-    the specified directory.
+    """Runs the given file processing operation on each image in
+    the given directory.
 
     Args:
         path: a directory path string
-        file_processor: a function(input_path, output_path) to run
-            on each JPG
+        file_processor: a function(input_path) to run on each image
     """
+    print('processing directory {} ...'.format(path))
     for file_name in os.listdir(path):
-        actual_file_location = os.path.join(path, file_name)
-        is_jpg = (os.path.splitext(file_name)[1] == '.jpg' or
-            os.path.splitext(file_name)[1] == '.JPG')
+        print('processing file {} ...'.format(file_name))
+        file_path = os.path.join(path, file_name)
 
-        if os.path.isfile(actual_file_location) and is_jpg:
-            image = Image.open(actual_file_location)
+        if os.path.isfile(file_path) and allowed_file(file_name):
             try:
-                image.load()
-                print('processing ' + os.path.splitext(file_name)[0])
-                output_path = generate_output_path(file_name)
-                file_processor(os.path.join(path, file_name), output_path)
+                file_processor(file_path)
             except IOError as error:
-                print('Bad image: %s' % error)
+                print('bad image: %s' % error)
         else:
             print('skipped non-image file')
