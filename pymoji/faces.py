@@ -2,13 +2,12 @@
 import os
 from tempfile import NamedTemporaryFile
 
-from flask import url_for
 from google.cloud import vision
 from google.cloud.vision import types
 
 from pymoji.constants import MAX_RESULTS, OUTPUT_DIR, PROJECT_ID, UPLOADS_DIR
 from pymoji.emoji import replace_faces
-from pymoji.utils import get_output_name, save_to_cloud
+from pymoji.utils import allowed_file, get_id_name, get_output_name, orient_image, save_to_cloud
 
 
 def detect_faces(input_content=None, input_source=None):
@@ -57,34 +56,27 @@ def detect_faces(input_content=None, input_source=None):
     return faces
 
 
-def process_path(input_path, output_filename=None):
-    """Processes the image at the specified input path and saves the result
-    to the static output directory. Creates the output directory first if
-    necessary. This is the CLI entrypoint.
+def process_path(input_path):
+    """Processes the image at the specified input path and returns the
+    ID-filename from the run. This is the CLI entrypoint.
 
     Args:
         input_path: path to source image file
-        output_filename: (optional) custom filename for output file
+
+    Returns:
+        an ID-filename string for the run
     """
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-
-    if not output_filename:
-        input_filename = os.path.basename(input_path)
-        output_filename = get_output_name(input_filename)
-
-    output_path = os.path.join(OUTPUT_DIR, output_filename)
-
-    with open(input_path, 'rb') as input_file:
-        faces = detect_faces(input_content=input_file)
-        if faces:
-            print('Saving to file: {}'.format(output_path))
-            input_file.seek(0) # Reset the file pointer, so we can read the file again
-            replace_faces(input_file, faces, output_path)
+    filename = os.path.basename(input_path)
+    id_filename = None
+    if os.path.isfile(input_path) and allowed_file(filename):
+        id_filename = process_local(input_path, filename)
+    return id_filename
 
 
 def process_local(image, input_filename):
-    """Local dev server entrypoint that processes the given image.
+    """Local dev server entrypoint that processes the given image and returns
+    the ID-filename from the run. Creates the output directory first if necessary.
+
     Only used when APP.testing == True.
 
     Args:
@@ -92,25 +84,36 @@ def process_local(image, input_filename):
         input_filename: string filename of the source image
 
     Returns:
-        tuple containing publicly accessible URLs in the form:
-            (input_image_url, output_image_url)
+        an ID-filename string for the run
     """
-    local_input_path = os.path.join(UPLOADS_DIR, input_filename)
-    print('Saving to file: {}'.format(local_input_path))
-    with open(local_input_path, 'wb') as input_file:
-        input_file.write(image.read())
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+        print('created output directory {}'.format(OUTPUT_DIR))
 
-    output_filename = get_output_name(input_filename)
-    process_path(local_input_path, output_filename=output_filename)
+    id_filename = get_id_name(input_filename)
+    id_path = os.path.join(UPLOADS_DIR, id_filename)
+    print('Saving to file: {}'.format(id_path))
+    with open(id_path, 'wb') as input_file:
+        orient_image(image, input_file) # rotate based on EXIF
 
-    input_image_url = url_for('static', filename='uploads/' + input_filename)
-    output_image_url = url_for('static', filename='gen/' + output_filename)
-    return (input_image_url, output_image_url)
+    with open(id_path, 'rb') as input_file:
+        faces = detect_faces(input_content=input_file)
+        input_file.seek(0) # Reset the file pointer, so we can read the file again
+
+        if faces:
+            output_filename = get_output_name(id_filename)
+            output_path = os.path.join(OUTPUT_DIR, output_filename)
+            print('Saving to file: {}'.format(output_path))
+            replace_faces(input_file, faces, output_path)
+
+    return id_filename
 
 
 def process_cloud(image, input_filename, mime):
-    """Production server entrypoint that processes the given image.
-    Uploads both the input and ouput images to Google Cloud Storage.
+    """Production server entrypoint that processes the given image and returns
+    the ID-filename from the run. Uploads both the input and ouput images to
+    Google Cloud Storage.
+
     Only used when APP.testing == False.
 
     Args:
@@ -119,23 +122,29 @@ def process_cloud(image, input_filename, mime):
         mime: MIME content type string
 
     Returns:
-        tuple containing publicly accessible URLs in the form:
-            (input_image_url, output_image_url)
+        an ID-filename string for the run
     """
-    input_image_url = save_to_cloud(image, 'uploads/' + input_filename, mime)
-    output_image_url = input_image_url
+    id_filename = get_id_name(input_filename)
 
-    # gs://bucket_name/object_name
-    input_source = "gs://{}/uploads/{}".format(PROJECT_ID, input_filename)
-    faces = detect_faces(input_source=input_source)
-    if faces:
-        # Use a named temp file so pillow can match input file encoding
-        suffix = '.' + input_filename.rsplit('.', 1)[1]
-        with NamedTemporaryFile(suffix=suffix) as output_file:
-            image.seek(0) # Reset the file pointer, so we can read the file again
-            replace_faces(image, faces, output_file)
-            output_file.seek(0) # Reset the file pointer, so we can read the file again
-            output_filename = get_output_name(input_filename)
-            output_image_url = save_to_cloud(output_file, 'gen/' + output_filename, mime)
+    # suffix for named temp files so pillow can auto match file encodings
+    suffix = '.' + input_filename.rsplit('.', 1)[1]
+    with NamedTemporaryFile(suffix=suffix) as input_file:
+        orient_image(image, input_file) # rotate based on EXIF
+        input_file.seek(0) # Reset the file pointer, so we can read the file again
 
-    return (input_image_url, output_image_url)
+        save_to_cloud(input_file, 'uploads/' + id_filename, mime)
+        input_file.seek(0) # Reset the file pointer, so we can read the file again
+
+        # gs://bucket_name/object_name
+        input_source = "gs://{}/uploads/{}".format(PROJECT_ID, id_filename)
+        faces = detect_faces(input_source=input_source)
+
+        if faces:
+            with NamedTemporaryFile(suffix=suffix) as output_file:
+                replace_faces(input_file, faces, output_file)
+                output_file.seek(0) # Reset the file pointer, so we can read the file again
+
+                output_filename = get_output_name(id_filename)
+                save_to_cloud(output_file, 'gen/' + output_filename, mime)
+
+    return id_filename
