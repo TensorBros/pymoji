@@ -1,11 +1,13 @@
 """Common utility functions."""
 from io import BytesIO
 import os
-import requests
+import time
 
 import exifread
 from google.cloud import storage
 from PIL import Image
+import requests
+from werkzeug.utils import secure_filename
 
 from pymoji.constants import ALLOWED_EXTENSIONS, PROJECT_ID
 
@@ -118,6 +120,19 @@ def orient_image(input_fp, output_fp):
 
     image.save(output_fp)
     image.close()
+
+
+def get_id_name(filename):
+    """Makes a safe, unique-ish filename based on the given input filename.
+
+    Args:
+        input_filename: a filname string, e.g. "face-input.jpg"
+
+    Returns:
+        a unique-ish filename string, e.g. "1503280514351_face-input.jpg"
+    """
+    timestamp = int(round(time.time() * 1000))
+    return str(timestamp) + '_' + secure_filename(filename)
 
 
 def get_output_name(input_filename):
