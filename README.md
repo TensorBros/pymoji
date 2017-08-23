@@ -6,7 +6,7 @@ Basic Flask web application that uses the Google Vision API to replace faces wit
 - https://app.google.stackdriver.com/?project=pymoji-176318
 
 
-## Install
+## 🛠 Install
 
 ### 🍺 OS Dependencies
 
@@ -27,7 +27,7 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
 
-#### Google Cloud Platform Deployment Dependencies
+#### ☁ Google Cloud Platform Deployment Dependencies
 - If deploying via Google Cloud
 ```
 brew cask install google-cloud-sdk
@@ -56,7 +56,7 @@ pip install --upgrade pip setuptools
 pip install -r requirements.txt
 ```
 
-### Git Hooks
+### 🎣 Git Hooks
 
 - Auomatically run linters before pushing:
 ```
@@ -64,7 +64,7 @@ cd <project-dir>
 ./git-pre-push.sh
 ```
 
-### Sublime
+### 📝 Sublime
 - http://mathalope.co.uk/2017/05/19/sublime-text-3-how-to-set-different-tab-size-based-on-file-type/
 - Optional: [SublimeLinter](http://sublimelinter.readthedocs.io/en/latest/)
   - [pylint extension](https://packagecontrol.io/packages/SublimeLinter-pylint)
@@ -77,9 +77,9 @@ cd <project-dir>
   ```
 
 
-## Local Environment
+## 💻 Local Environment
 
-### Initial Configuration
+### ⚙ Initial Configuration
 - Start by cloning a new developer config
 ```
 cd <project-dir>
@@ -101,7 +101,7 @@ cd <project-dir>
 ./cli build
 ```
 
-### Localhost Webserver
+### 🌎 Localhost Webserver
 
 - Open a terminal and run the dev webserver:
 ```
@@ -112,7 +112,7 @@ cd <project-dir>
 - Open a browser and navigate to http://localhost:5000
 
 
-### Command Line Interface
+### ⌨ Command Line Interface
 
 - HALP.
 ```
@@ -139,7 +139,7 @@ cd <project-dir>
 ```
 
 
-### Deploy to Cloud (Manual)
+### ☁ Deploy to Cloud (Manual)
 
 ```
 cd <project-dir>
