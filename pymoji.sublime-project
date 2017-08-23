@@ -2,7 +2,7 @@
     "folders": [
     {
         "path": ".",
-        "folder_exclude_patterns": ["__pycache__"]
+        "folder_exclude_patterns": ["__pycache__", ".cache"]
     }],
     "SublimeLinter":
     {
