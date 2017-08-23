@@ -47,6 +47,7 @@ def emojivision(id_filename):
 
     return render_template(
         'result.html',
+        id_filename=id_filename,
         input_image_url=input_image_url,
         output_image_url=output_image_url
     )
@@ -56,6 +57,7 @@ def emojivision(id_filename):
 def index():
     """Serves the upload form index page. Sucessful submissions redirect to the
     results page for the uploaded ID-filename."""
+    id_filename = request.args.get('id_filename')
     if request.method == 'POST':
         # check if the post request has an image
         if 'image' not in request.files:
@@ -80,7 +82,7 @@ def index():
 
         return redirect(request.url)
 
-    return render_template("form.html")
+    return render_template("form.html", id_filename=id_filename)
 
 
 @APP.route('/favicon.ico')
