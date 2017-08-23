@@ -6,6 +6,7 @@ import os
 PACKAGE_DIR = 'pymoji'
 STATIC_DIR = os.path.join(PACKAGE_DIR, 'static')
 UPLOADS_DIR = os.path.join(STATIC_DIR, 'uploads')
+DEMO_PATH = os.path.join(UPLOADS_DIR, 'face-input.jpg')
 OUTPUT_DIR = os.path.join(STATIC_DIR, 'gen')
 
 # Supported image files (Google Vision and pillow)
