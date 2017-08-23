@@ -97,12 +97,11 @@ def orient_image(input_fp, output_fp):
         input_fp: an image file-object with EXIF metadata
         output_fp: a file-object to save the result to
     """
-    image = Image.open(input_fp)
-
     tags = []
-    with open(input_fp, 'rb') as input_file:
-        tags = exifread.process_file(input_file)
+    tags = exifread.process_file(input_fp)
+    input_fp.seek(0) # Reset the file pointer, so we can read the file again
 
+    image = Image.open(input_fp)
     orientation_key = 'Image Orientation'
     if tags and orientation_key in tags:
         orientation_tag = tags[orientation_key]
