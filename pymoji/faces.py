@@ -69,7 +69,8 @@ def process_path(input_path):
     filename = os.path.basename(input_path)
     id_filename = None
     if os.path.isfile(input_path) and allowed_file(filename):
-        id_filename = process_local(input_path, filename)
+        with open(input_path, 'rb') as input_file:
+            id_filename = process_local(input_file, filename)
     return id_filename
 
 
