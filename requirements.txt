@@ -19,3 +19,4 @@ google-cloud-vision==0.26.0
 
 # image processing
 Pillow==4.2.1
+exifread==2.1.2
