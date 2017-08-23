@@ -60,6 +60,7 @@ jobs:
       - run:
           name: clone environment config
           command: |
+            mkdir instance
             cp config.py instance/config.py
 
       # Run linters
