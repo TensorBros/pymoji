@@ -9,7 +9,8 @@ from PIL import Image
 import requests
 from werkzeug.utils import secure_filename
 
-from pymoji.constants import ALLOWED_EXTENSIONS, PROJECT_ID
+from pymoji import PROJECT_ID
+from pymoji.constants import ALLOWED_EXTENSIONS
 
 
 def shell(cmd):
@@ -160,11 +161,7 @@ def process_folder(path, file_processor):
     for file_name in os.listdir(path):
         print('processing file {} ...'.format(file_name))
         file_path = os.path.join(path, file_name)
-
-        if os.path.isfile(file_path) and allowed_file(file_name):
-            try:
-                file_processor(file_path)
-            except IOError as error:
-                print('bad image: %s' % error)
-        else:
-            print('skipped non-image file')
+        try:
+            file_processor(file_path)
+        except IOError as error:
+            print('bad image: %s' % error)

@@ -79,14 +79,27 @@ cd <project-dir>
 
 ## Local Environment
 
+### Initial Configuration
+- Start by cloning a new developer config
+```
+cd <project-dir>
+cp config.py instance/config.py
+```
+
+- Edit `instance/config.py` as needed
+```python
+# probably good to at least set these:
+DEBUG = True
+TESTING = True
+SECRET_KEY = 'a-secret-all-your-own' # change this
+#SERVER_NAME = 'tensorbros.com' # comment out for localhost
+```
+
 - Make sure everything works
 ```
 cd <project-dir>
 ./cli build
 ```
-
-### Dev Config
-- TODO
 
 ### Localhost Webserver
 
