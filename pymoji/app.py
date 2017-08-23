@@ -6,7 +6,7 @@ from flask import flash, redirect, render_template, request, send_from_directory
 from google.cloud import error_reporting
 
 from pymoji import APP, PROJECT_ID
-from pymoji.constants import CLOUD_ROOT
+from pymoji.constants import CLOUD_ROOT, DEMO_PATH
 from pymoji.faces import process_cloud, process_local
 from pymoji.utils import allowed_file, get_output_name
 
@@ -27,6 +27,18 @@ def after_request(response):
     response.headers.add('X-Content-Type-Options', 'nosniff')
     response.headers.add('X-XSS-Protection', '1')
     return response
+
+
+@APP.route('/emojivision/')
+def emojivision_index():
+    """Launches a demo run and redirects to the results."""
+    input_filename = 'demo.jpg'
+    with open(DEMO_PATH, 'rb') as image:
+        if APP.testing:
+            id_filename = process_local(image, input_filename)
+        else:
+            id_filename = process_cloud(image, input_filename, 'image/jpeg')
+    return redirect(url_for('emojivision', id_filename=id_filename))
 
 
 @APP.route('/emojivision/<id_filename>')
