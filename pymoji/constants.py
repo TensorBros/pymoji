@@ -8,11 +8,7 @@ STATIC_DIR = os.path.join(PACKAGE_DIR, 'static')
 UPLOADS_DIR = os.path.join(STATIC_DIR, 'uploads')
 OUTPUT_DIR = os.path.join(STATIC_DIR, 'gen')
 
-# Google App Engine
-PROJECT_ID = 'pymoji-176318'
-
-# Face detection params
-MAX_RESULTS = 20
+# Supported image files (Google Vision and pillow)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 # Google Vision Likelihood
@@ -28,4 +24,4 @@ EMOJI_CDN_PATH = 'https://cdn.jsdelivr.net/emojione/assets/3.1/png/128/'
 # backup path: 'https://api.emojione.com/emoji/1f62d/download/128/'
 
 # Google Cloud Storage
-CLOUD_ROOT = 'http://storage.googleapis.com/pymoji-176318/'
+CLOUD_ROOT = 'http://storage.googleapis.com/'

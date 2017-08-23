@@ -3,7 +3,7 @@ from pymoji.app import APP
 
 
 def test_index():
-    """tests pymoji.app.index"""
+    """tests pymoji.app.APP.index"""
     APP.testing = True
     client = APP.test_client()
 

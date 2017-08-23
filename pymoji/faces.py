@@ -5,7 +5,8 @@ from tempfile import NamedTemporaryFile
 from google.cloud import vision
 from google.cloud.vision import types
 
-from pymoji.constants import MAX_RESULTS, OUTPUT_DIR, PROJECT_ID, UPLOADS_DIR
+from pymoji import PROJECT_ID, MAX_RESULTS
+from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
 from pymoji.utils import allowed_file, get_id_name, get_output_name, orient_image, save_to_cloud
 
@@ -71,6 +72,8 @@ def process_path(input_path):
     if os.path.isfile(input_path) and allowed_file(filename):
         with open(input_path, 'rb') as input_file:
             id_filename = process_local(input_file, filename)
+    else:
+        print('skipped non-image file')
     return id_filename
 
 
@@ -94,18 +97,18 @@ def process_local(image, input_filename):
     id_filename = get_id_name(input_filename)
     id_path = os.path.join(UPLOADS_DIR, id_filename)
     print('Saving to file: {}'.format(id_path))
-    with open(id_path, 'wb') as input_file:
-        orient_image(image, input_file) # rotate based on EXIF
+    with open(id_path, 'wb') as id_file:
+        orient_image(image, id_file) # rotate based on EXIF
 
-    with open(id_path, 'rb') as input_file:
-        faces = detect_faces(input_content=input_file)
-        input_file.seek(0) # Reset the file pointer, so we can read the file again
+    with open(id_path, 'rb') as id_file:
+        faces = detect_faces(input_content=id_file)
+        id_file.seek(0) # Reset the file pointer, so we can read the file again
 
         if faces:
             output_filename = get_output_name(id_filename)
             output_path = os.path.join(OUTPUT_DIR, output_filename)
             print('Saving to file: {}'.format(output_path))
-            replace_faces(input_file, faces, output_path)
+            replace_faces(id_file, faces, output_path)
 
     return id_filename
 

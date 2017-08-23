@@ -1,28 +1,14 @@
-"""Initializes and configures the Emojivision web app."""
+"""Hooks up the routes for the Emojivision web app."""
 from datetime import datetime
 import logging
 
-from flask import Flask, flash, redirect, render_template, request, send_from_directory, url_for
+from flask import flash, redirect, render_template, request, send_from_directory, url_for
 from google.cloud import error_reporting
-import google.cloud.logging
 
-from pymoji.constants import CLOUD_ROOT, PROJECT_ID
+from pymoji import APP, PROJECT_ID
+from pymoji.constants import CLOUD_ROOT
 from pymoji.faces import process_cloud, process_local
 from pymoji.utils import allowed_file, get_output_name
-
-
-APP = Flask(__name__)
-APP.config['SECRET_KEY'] = 'so-so-secret' # change this
-# IMPORTANT: be extremely careful with config['TRAP_HTTP_EXCEPTIONS']
-# Setting to True will break Google App Engine load balancers!!!
-# (this probably has to do with GAE expecting a 404 at /_ah/healthcheck)
-APP.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16MB upload limit
-
-# Configure logging
-if not APP.testing:
-    LOGGER = google.cloud.logging.Client(project=PROJECT_ID)
-    # Attaches a Google Stackdriver logging handler to the root logger
-    LOGGER.setup_logging(logging.INFO)
 
 
 @APP.after_request
@@ -43,17 +29,21 @@ def after_request(response):
     return response
 
 
-@APP.route('/emojivision/<input_filename>')
-def emojivision(input_filename):
-    """Handles the results page."""
-    output_filename = get_output_name(input_filename)
+@APP.route('/emojivision/<id_filename>')
+def emojivision(id_filename):
+    """Serves the results page for the given ID-filename.
+
+    Args:
+        id_filename: a unique filename string
+    """
+    output_filename = get_output_name(id_filename)
 
     if APP.testing:
-        input_image_url = url_for('static', filename='uploads/' + input_filename)
+        input_image_url = url_for('static', filename='uploads/' + id_filename)
         output_image_url = url_for('static', filename='gen/' + output_filename)
     else:
-        input_image_url = CLOUD_ROOT + 'uploads/' + input_filename
-        output_image_url = CLOUD_ROOT + 'gen/' + output_filename
+        input_image_url = CLOUD_ROOT + PROJECT_ID + '/uploads/' + id_filename
+        output_image_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + output_filename
 
     return render_template(
         'result.html',
@@ -64,7 +54,8 @@ def emojivision(input_filename):
 
 @APP.route('/', methods=['GET', 'POST'])
 def index():
-    """Handles the index page."""
+    """Serves the upload form index page. Sucessful submissions redirect to the
+    results page for the uploaded ID-filename."""
     if request.method == 'POST':
         # check if the post request has an image
         if 'image' not in request.files:
@@ -85,7 +76,7 @@ def index():
             else:
                 id_filename = process_cloud(image, image.filename, image.content_type)
 
-            return redirect(url_for('emojivision', input_filename=id_filename))
+            return redirect(url_for('emojivision', id_filename=id_filename))
 
         return redirect(request.url)
 
