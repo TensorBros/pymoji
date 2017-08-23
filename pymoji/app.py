@@ -38,7 +38,10 @@ def emojivision_index():
             id_filename = process_local(image, input_filename)
         else:
             id_filename = process_cloud(image, input_filename, 'image/jpeg')
-    return redirect(url_for('emojivision', id_filename=id_filename))
+        return redirect(url_for('emojivision', id_filename=id_filename))
+
+    # fallback on root index
+    return redirect(url_for('index'))
 
 
 @APP.route('/emojivision/<id_filename>')
@@ -69,7 +72,7 @@ def emojivision(id_filename):
 def index():
     """Serves the upload form index page. Sucessful submissions redirect to the
     results page for the uploaded ID-filename."""
-    id_filename = request.args.get('id_filename')
+    id_filename = request.args.get('id_filename', '')
     if request.method == 'POST':
         # check if the post request has an image
         if 'image' not in request.files:
