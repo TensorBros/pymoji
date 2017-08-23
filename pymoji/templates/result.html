@@ -4,24 +4,25 @@
 
 <h3>✨🕶 Emojivision 🕶✨</h3>
 
-{% if input_image_url %}
-<div class="media">
-  <div class="media-left">
-      <img src="{{input_image_url}}" alt="input image" width="400">
+<div class="panel panel-default" style="max-width: 432px;">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      {{ id_filename}}
+    </h4>
+  </div>
+  <div class="panel-body">
+    <div class="" style="overflow: hidden;">
+      <img src="{{input_image_url}}" alt="🚧 No 📸 found! 🚧" width="400">
+    </div>
+    <div class="" style="overflow: hidden;">
+      <img src="{{output_image_url}}" alt="🚧 No 📸 found! 🚧" width="400">
+    </div>
+    <div class="panel-footer">
+      <a href="{{ url_for('index', id_filename=id_filename) }}" class="btn btn-primary">
+        ⬅ 📸 New Upload 📸
+      </a>
+    </div>
   </div>
 </div>
-{% else %}
-<p>🚧 No 📸 found! 🚧</p>
-{% endif %}
-
-{% if output_image_url %}
-<div class="media">
-  <div class="media-left">
-      <img src="{{output_image_url}}" alt="output image" width="400">
-  </div>
-</div>
-{% else %}
-<p>🚧 No 📸 found! 🚧</p>
-{% endif %}
 
 {% endblock %}
