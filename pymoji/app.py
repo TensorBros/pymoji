@@ -1,12 +1,10 @@
 """Initializes and configures the Emojivision web app."""
 from datetime import datetime
 import logging
-import time
 
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, url_for
 from google.cloud import error_reporting
 import google.cloud.logging
-from werkzeug.utils import secure_filename
 
 from pymoji.constants import CLOUD_ROOT, PROJECT_ID
 from pymoji.faces import process_cloud, process_local
@@ -80,15 +78,14 @@ def index():
 
         # handle valid files
         if image and allowed_file(image.filename):
-            timestamp = int(round(time.time() * 1000))
-            input_filename = str(timestamp) + '_' + secure_filename(image.filename)
+            id_filename = None
 
             if APP.testing:
-                process_local(image, input_filename)
+                id_filename = process_local(image, image.filename)
             else:
-                process_cloud(image, input_filename, image.content_type)
+                id_filename = process_cloud(image, image.filename, image.content_type)
 
-            return redirect(url_for('emojivision', input_filename=input_filename))
+            return redirect(url_for('emojivision', input_filename=id_filename))
 
         return redirect(request.url)
 
