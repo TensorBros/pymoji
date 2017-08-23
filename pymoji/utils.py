@@ -3,6 +3,7 @@ from io import BytesIO
 import os
 import requests
 
+import exifread
 from google.cloud import storage
 from PIL import Image
 
@@ -82,6 +83,41 @@ def download_image(image_uri):
     response = requests.get(image_uri)
     print('...download completed.')
     return Image.open(BytesIO(response.content))
+
+
+def orient_image(input_fp, output_fp):
+    """Rotates the given image file based on EXIF orientation metadata and
+    exports the result to the given destination file.
+
+    https://stackoverflow.com/questions/4228530/pil-thumbnail-is-rotating-my-image
+
+    Args:
+        input_fp: an image file-object with EXIF metadata
+        output_fp: a file-object to save the result to
+    """
+    image = Image.open(input_fp)
+
+    tags = []
+    with open(input_fp, 'rb') as input_file:
+        tags = exifread.process_file(input_file)
+
+    orientation_key = 'Image Orientation'
+    if tags and orientation_key in tags:
+        orientation_tag = tags[orientation_key]
+        if orientation_tag.values:
+            tag_value = orientation_tag.values[0] # assume this for now???
+            if tag_value == 3:
+                image = image.rotate(180, expand=True)
+                print('rotated image 180 degrees')
+            elif tag_value == 6:
+                image = image.rotate(270, expand=True)
+                print('rotated image 270 degrees')
+            elif tag_value == 8:
+                image = image.rotate(90, expand=True)
+                print('rotated image 90 degrees')
+
+    image.save(output_fp)
+    image.close()
 
 
 def get_output_name(input_filename):
