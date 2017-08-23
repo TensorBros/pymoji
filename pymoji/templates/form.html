@@ -5,12 +5,22 @@
 <h3>📸 Upload 📸</h3>
 
 <form method="POST" enctype="multipart/form-data">
-  <div class="form-group">
-    <label for="image">image < 10MB</label>
-    <input type="file" name="image" id="image" class="form-control"
-      accept="image/*" required="true" />
-  </div>
-  <button type="submit" value="Upload" class="btn btn-success">🚀 Launch 🚀</button>
+  <div class="panel panel-default" style="max-width: 432px;">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        process a new image
+      </h4>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="image">take a photo or select an image < 10MB</label>
+        <input type="file" name="image" id="image" class="form-control"
+          accept="image/*" required="true" />
+      </div>
+      </div>
+    <div class="panel-footer">
+      <button type="submit" value="Upload" class="btn btn-success">🚀 Launch 🚀</button>
+    </div>
 </form>
 
 {% endblock %}
