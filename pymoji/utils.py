@@ -135,6 +135,19 @@ def get_id_name(filename):
     return str(timestamp) + '_' + secure_filename(filename)
 
 
+def get_meta_name(input_filename):
+    """Makes a faces metadata filename based on the given input filename.
+
+    Args:
+        input_filename: a filname string, e.g. "face-input.jpg"
+
+    Returns:
+        a filename string, e.g. "face-input-meta.json"
+    """
+    filename = input_filename.split('.')[-2]
+    return filename + "-meta.json"
+
+
 def get_output_name(input_filename):
     """Makes an output filename based on the given input filename.
 
