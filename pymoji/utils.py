@@ -10,6 +10,7 @@ import requests
 from werkzeug.utils import secure_filename
 
 from pymoji import PROJECT_ID
+from pymoji.models import AnnotationsSchema
 from pymoji.constants import ALLOWED_EXTENSIONS
 
 
@@ -68,6 +69,52 @@ def save_to_cloud(binary_file, filename, content_type):
     print('...upload completed.')
     # The public URL can be used to directly access the uploaded file via HTTP.
     return blob.public_url
+
+
+def write_meta(faces, meta_fp):
+    """Serializes the given metadata object with marshmallow and writes the
+    resulting JSON string to the given file object.
+
+    Args:
+        faces: a list of annotation objects from the Google Vision API
+        meta_fp: a file-object with string write access to write JSON to
+    """
+    schema = AnnotationsSchema()
+    result = schema.dumps({'faces': faces})
+    meta_fp.write(result.data)
+
+
+def load_meta(meta_fp):
+    """Deserializes the JSON metadata from the given file-object (string) with
+    marshmallow and returns the resulting object.
+
+    Args:
+        meta_fp: a file-object with string read access containing the metadata
+
+    Returns:
+        a metadata object based on annotations from the Google Vision API.
+    """
+    schema = AnnotationsSchema()
+    result = schema.loads(meta_fp.read())
+    return result.data
+
+
+def download_meta(meta_uri):
+    """Downloads the JSON metadata at the given URI, deserializes it with
+    marshmallow, and returns the resulting object.
+
+    Args:
+        image_uri: an metadata uri, e.g. 'http://cdn/path/to/image-meta.json'
+
+    Returns:
+        a metadata object based on annotations from the Google Vision API.
+    """
+    print('Downloading metadata: {} ...'.format(meta_uri))
+    response = requests.get(meta_uri)
+    print('...download completed.')
+    schema = AnnotationsSchema()
+    result = schema.loads(response.text)
+    return result.data
 
 
 def download_image(image_uri):
