@@ -8,7 +8,8 @@ from google.cloud.vision import types
 from pymoji import PROJECT_ID, MAX_RESULTS
 from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
-from pymoji.utils import allowed_file, get_id_name, get_output_name, orient_image, save_to_cloud
+from pymoji.utils import allowed_file, get_id_name, get_meta_name, get_output_name, \
+    orient_image, save_to_cloud, write_meta
 
 
 def detect_faces(input_content=None, input_source=None):
@@ -105,6 +106,12 @@ def process_local(image, input_filename):
         id_file.seek(0) # Reset the file pointer, so we can read the file again
 
         if faces:
+            meta_filename = get_meta_name(id_filename)
+            meta_path = os.path.join(OUTPUT_DIR, meta_filename)
+            print('Saving to file: {}'.format(meta_path))
+            with open(meta_path, 'w') as meta_file:
+                write_meta(faces, meta_file)
+
             output_filename = get_output_name(id_filename)
             output_path = os.path.join(OUTPUT_DIR, output_filename)
             print('Saving to file: {}'.format(output_path))
@@ -144,6 +151,13 @@ def process_cloud(image, input_filename, mime):
         faces = detect_faces(input_source=input_source)
 
         if faces:
+            with NamedTemporaryFile(suffix=suffix, mode='w+') as meta_file:
+                write_meta(faces, meta_file)
+                meta_file.seek(0) # Reset the file pointer, so we can read the file again
+
+                meta_filename = get_meta_name(id_filename)
+                save_to_cloud(meta_file, 'gen/' + meta_filename, 'application/json')
+
             with NamedTemporaryFile(suffix=suffix) as output_file:
                 replace_faces(input_file, faces, output_file)
                 output_file.seek(0) # Reset the file pointer, so we can read the file again
