@@ -1,14 +1,15 @@
 """Hooks up the routes for the Emojivision web app."""
 from datetime import datetime
 import logging
+import os
 
 from flask import flash, redirect, render_template, request, send_from_directory, url_for
 from google.cloud import error_reporting
 
 from pymoji import APP, PROJECT_ID
-from pymoji.constants import CLOUD_ROOT, DEMO_PATH
+from pymoji.constants import CLOUD_ROOT, DEMO_PATH, OUTPUT_DIR
 from pymoji.faces import process_cloud, process_local
-from pymoji.utils import allowed_file, get_output_name
+from pymoji.utils import allowed_file, download_meta, get_meta_name, get_output_name, load_meta
 
 
 @APP.after_request
@@ -52,19 +53,37 @@ def emojivision(id_filename):
         id_filename: a unique filename string
     """
     output_filename = get_output_name(id_filename)
+    meta_filename = get_meta_name(id_filename)
+
+    # hidden mode for live debugging
+    is_haxxx_mode = request.args.get('haxxx', False)
 
     if APP.testing:
         input_image_url = url_for('static', filename='uploads/' + id_filename)
         output_image_url = url_for('static', filename='gen/' + output_filename)
+        meta_url = url_for('static', filename='gen/' + meta_filename)
     else:
         input_image_url = CLOUD_ROOT + PROJECT_ID + '/uploads/' + id_filename
         output_image_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + output_filename
+        meta_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + meta_filename
+
+    meta = None
+    if is_haxxx_mode:
+        if APP.testing:
+            meta_path = os.path.join(OUTPUT_DIR, meta_filename)
+            with open(meta_path) as meta_file:
+                meta = load_meta(meta_file)
+        else:
+            meta = download_meta(meta_url)
 
     return render_template(
         'result.html',
         id_filename=id_filename,
+        is_haxxx_mode=is_haxxx_mode,
         input_image_url=input_image_url,
-        output_image_url=output_image_url
+        output_image_url=output_image_url,
+        meta_url=meta_url,
+        meta=meta
     )
 
 
