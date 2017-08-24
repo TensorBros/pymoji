@@ -25,4 +25,22 @@
   </div>
 </div>
 
+{%- if is_haxxx_mode %}
+  <div class="panel panel-info" style="max-width: 432px;">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        Metadata
+      </h4>
+    </div>
+    <div class="panel-body">
+      {{ meta | pprint }}
+    </div>
+    <div class="panel-footer">
+      <a href="{{ meta_url }}" class="">
+        {{ meta_url }}
+      </a>
+    </div>
+  </div>
+{%- endif %}
+
 {% endblock %}
