@@ -27,7 +27,7 @@ def shell(cmd):
 
 
 def get_extension(filename):
-    """Returns the extension of the given filename (including the '.' if present)"""
+    """Returns the extension of the given filename."""
     if '.' not in filename:
         return ''
     return filename.rsplit('.', 1)[1].lower()
@@ -44,8 +44,7 @@ def allowed_file(filename):
     Result:
         True iff the filename is allowed.
     """
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return get_extension(filename) in ALLOWED_EXTENSIONS
 
 
 def save_to_cloud(data_stream, filename, content_type):
@@ -218,7 +217,7 @@ def get_output_name(input_filename):
         a filename string, e.g. "face-input-output.jpg"
     """
     filename = input_filename.split('.')[-2]
-    extension = input_filename.split('.')[-1]
+    extension = get_extension(input_filename)
     return filename + "-output." + extension
 
 
