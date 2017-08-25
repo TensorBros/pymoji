@@ -153,8 +153,8 @@ def process_cloud(image_stream, input_filename, mime):
         input_stream.seek(0) # reset the stream for next use
 
         # gs://bucket_name/object_name
-        input_source = "gs://{}/uploads/{}".format(PROJECT_ID, id_filename)
-        faces = detect_faces(input_stream=input_source)
+        input_uri = "gs://{}/uploads/{}".format(PROJECT_ID, id_filename)
+        faces = detect_faces(input_uri=input_uri)
 
         if faces:
             with NamedTemporaryFile(suffix=suffix, mode='w+') as json_stream:
