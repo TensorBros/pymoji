@@ -8,13 +8,14 @@ from google.cloud.vision import types
 from pymoji import PROJECT_ID, MAX_RESULTS
 from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
-from pymoji.utils import allowed_file, get_id_name, get_meta_name, get_output_name, \
-    orient_image, save_to_cloud, write_meta
+from pymoji.utils import allowed_file, get_id_name, get_json_name, get_output_name, \
+    orient_image, save_to_cloud, write_json
 
 
-def detect_faces(input_content=None, input_source=None):
+def detect_faces(input_stream=None, input_uri=None):
     """Uses the Vision API to detect faces in an input image. Pass the input
-    image as a binary stream (takes precedence) or Google Cloud Storage URI.
+    image as either a BufferedIO stream (takes precedence) or a Google Cloud
+    Storage URI.
 
     https://googlecloudplatform.github.io/google-cloud-python/latest/vision/index.html#annotate-an-image
     https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.Image
@@ -24,10 +25,10 @@ def detect_faces(input_content=None, input_source=None):
     https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.AnnotateImageResponse
 
     Args:
-        input_content: a binary stream containing an image with faces.
-        input_source: an image uri for either Google Cloud storage
+        input_stream: a BufferedIO stream containing an image with faces.
+        input_uri: an image uri for either Google Cloud storage
             e.g. 'gs://bucket_name/path/to/image.jpg'
-            or public http/https url
+            or public HTTP/HTTP url
             e.g. 'http://cdn/path/to/image.jpg'
 
     Returns:
@@ -39,10 +40,10 @@ def detect_faces(input_content=None, input_source=None):
     # convert input image to Google Cloud Image
     content = None
     source = None
-    if input_content:
-        content = input_content.read()
-    elif input_source:
-        source = types.ImageSource(image_uri=input_source) # pylint: disable=no-member
+    if input_stream:
+        content = input_stream.read()
+    elif input_uri:
+        source = types.ImageSource(image_uri=input_uri) # pylint: disable=no-member
     image = types.Image(content=content, source=source) # pylint: disable=no-member
 
     features = [{
@@ -78,14 +79,14 @@ def process_path(input_path):
     return id_filename
 
 
-def process_local(image, input_filename):
+def process_local(image_stream, input_filename):
     """Local dev server entrypoint that processes the given image and returns
     the ID-filename from the run. Creates the output directory first if necessary.
 
     Only used when APP.testing == True.
 
     Args:
-        image: an image file-object
+        image_stream: a BufferedIO containing an image
         input_filename: string filename of the source image
 
     Returns:
@@ -99,18 +100,18 @@ def process_local(image, input_filename):
     id_path = os.path.join(UPLOADS_DIR, id_filename)
     print('Saving to file: {}'.format(id_path))
     with open(id_path, 'wb') as id_file:
-        orient_image(image, id_file) # rotate based on EXIF
+        orient_image(image_stream, id_file) # rotate based on EXIF
 
     with open(id_path, 'rb') as id_file:
-        faces = detect_faces(input_content=id_file)
+        faces = detect_faces(input_stream=id_file)
         id_file.seek(0) # Reset the file pointer, so we can read the file again
 
         if faces:
-            meta_filename = get_meta_name(id_filename)
-            meta_path = os.path.join(OUTPUT_DIR, meta_filename)
-            print('Saving to file: {}'.format(meta_path))
-            with open(meta_path, 'w') as meta_file:
-                write_meta(faces, meta_file)
+            json_filename = get_json_name(id_filename)
+            json_path = os.path.join(OUTPUT_DIR, json_filename)
+            print('Saving to file: {}'.format(json_path))
+            with open(json_path, 'w') as json_file:
+                write_json(faces, json_file)
 
             output_filename = get_output_name(id_filename)
             output_path = os.path.join(OUTPUT_DIR, output_filename)
@@ -120,7 +121,7 @@ def process_local(image, input_filename):
     return id_filename
 
 
-def process_cloud(image, input_filename, mime):
+def process_cloud(image_stream, input_filename, mime):
     """Production server entrypoint that processes the given image and returns
     the ID-filename from the run. Uploads both the input and ouput images to
     Google Cloud Storage.
@@ -128,7 +129,7 @@ def process_cloud(image, input_filename, mime):
     Only used when APP.testing == False.
 
     Args:
-        image: an image file-object
+        image_stream: a BufferedIO containing an image
         input_filename: string filename of the source image
         mime: MIME content type string
 
@@ -140,7 +141,7 @@ def process_cloud(image, input_filename, mime):
     # suffix for named temp files so pillow can auto match file encodings
     suffix = '.' + input_filename.rsplit('.', 1)[1]
     with NamedTemporaryFile(suffix=suffix) as input_file:
-        orient_image(image, input_file) # rotate based on EXIF
+        orient_image(image_stream, input_file) # rotate based on EXIF
         input_file.seek(0) # Reset the file pointer, so we can read the file again
 
         save_to_cloud(input_file, 'uploads/' + id_filename, mime)
@@ -148,15 +149,15 @@ def process_cloud(image, input_filename, mime):
 
         # gs://bucket_name/object_name
         input_source = "gs://{}/uploads/{}".format(PROJECT_ID, id_filename)
-        faces = detect_faces(input_source=input_source)
+        faces = detect_faces(input_stream=input_source)
 
         if faces:
-            with NamedTemporaryFile(suffix=suffix, mode='w+') as meta_file:
-                write_meta(faces, meta_file)
-                meta_file.seek(0) # Reset the file pointer, so we can read the file again
+            with NamedTemporaryFile(suffix=suffix, mode='w+') as json_file:
+                write_json(faces, json_file)
+                json_file.seek(0) # Reset the file pointer, so we can read the file again
 
-                meta_filename = get_meta_name(id_filename)
-                save_to_cloud(meta_file, 'gen/' + meta_filename, 'application/json')
+                json_filename = get_json_name(id_filename)
+                save_to_cloud(json_file, 'gen/' + json_filename, 'application/json')
 
             with NamedTemporaryFile(suffix=suffix) as output_file:
                 replace_faces(input_file, faces, output_file)

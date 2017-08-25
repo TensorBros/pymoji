@@ -11,7 +11,11 @@ from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIK
 from pymoji.utils import download_image
 
 
+# dictionary object to use as in-memory cache of emoji images
+# key: emoji code string
+# value: 128x128 RGBA PIL.Image
 EMOJI = {} # cache
+
 DEFAULT_CODE = "1f642" # slightly smiling face
 SORROW_CODES = [
     "1f641", # slightly frowning face
@@ -136,20 +140,20 @@ def render_emoji(image, face):
     image.paste(emoji, (top_left.x, top_left.y), emoji)
 
 
-def replace_faces(input_fp, faces, output_fp):
+def replace_faces(input_stream, faces, output_stream):
     """Replaces all faces in the given input image with emoji based on the
     given face annotation data, then writes to the given output.
 
     The input and output may be either a filename (string), pathlib.Path object,
-    or binary file object.
+    or BufferedIO stream with read and write access, respectively.
 
     Args:
-        input_fp: a file-like-object containing an image.
+        input_stream: a file-like-object containing an image.
         faces: a list of face annotation objects from the Google Vision API.
-        output_fp: a file-like-object to write the result to.
+        output_stream: a file-like-object to write the result to.
     """
-    output_image = Image.open(input_fp)
+    output_image = Image.open(input_stream)
     for face in faces:
         render_emoji(output_image, face)
-    output_image.save(output_fp)
+    output_image.save(output_stream)
     output_image.close()

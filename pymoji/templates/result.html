@@ -29,15 +29,15 @@
   <div class="panel panel-info" style="max-width: 432px;">
     <div class="panel-heading">
       <h4 class="panel-title">
-        Metadata
+        Annotations
       </h4>
     </div>
     <div class="panel-body">
-      {{ meta | pprint }}
+      {{ json_data | pprint }}
     </div>
     <div class="panel-footer">
-      <a href="{{ meta_url }}" class="">
-        {{ meta_url }}
+      <a href="{{ json_url }}" class="">
+        {{ json_url }}
       </a>
     </div>
   </div>
