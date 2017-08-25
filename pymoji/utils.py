@@ -26,6 +26,13 @@ def shell(cmd):
         raise Exception("Error in script:\n{0}".format(cmd))
 
 
+def get_extension(filename):
+    """Returns the extension of the given filename (including the '.' if present)"""
+    if '.' not in filename:
+        return ''
+    return filename.rsplit('.', 1)[1].lower()
+
+
 def allowed_file(filename):
     """Checks if the given filename matches the allowed extensions.
 
