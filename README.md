@@ -86,13 +86,13 @@ cd <project-dir>
 cp config.py instance/config.py
 ```
 
-- Edit `instance/config.py` as needed
+- Edit `instance/config.py` as needed. Be sure to comment out `SERVER_NAME`!
 ```python
 # probably good to at least set these:
 DEBUG = True
 TESTING = True
-SECRET_KEY = 'a-secret-all-your-own' # change this
-#SERVER_NAME = 'tensorbros.com' # comment out for localhost
+# IMPORTANT: must comment this out!!! ("localhost" is unsupported)
+# SERVER_NAME = 'tensorbros.com'
 ```
 
 - Make sure everything works

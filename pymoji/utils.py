@@ -1,4 +1,8 @@
-"""Common utility functions."""
+"""Common utility functions.
+
+https://docs.python.org/3/tutorial/inputoutput.html
+https://docs.python.org/3/library/io.html
+"""
 from io import BytesIO
 import os
 import time
@@ -37,14 +41,14 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def save_to_cloud(binary_file, filename, content_type):
-    """Saves a binary file to the Google Storage Cloud and returns the new
-    public URL.
+def save_to_cloud(data_stream, filename, content_type):
+    """Saves the data in the given IO stream to the Google Storage Cloud and
+    returns the new public URL.
 
     https://cloud.google.com/appengine/docs/flexible/python/using-cloud-storage
 
     Args:
-        binary_file: a binary file object with read access
+        data_stream: an IO stream object with read access
         filename: the desired destination filename
         content_type: MIME content type
 
@@ -62,7 +66,7 @@ def save_to_cloud(binary_file, filename, content_type):
     blob = bucket.blob(filename)
 
     blob.upload_from_string(
-        binary_file.read(),
+        data_stream.read(),
         content_type=content_type
     )
 
@@ -71,37 +75,39 @@ def save_to_cloud(binary_file, filename, content_type):
     return blob.public_url
 
 
-def write_meta(faces, meta_fp):
+def write_json(faces, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
-    resulting JSON string to the given file object.
+    resulting JSON string to the given TextIO stream.
 
     Args:
         faces: a list of annotation objects from the Google Vision API
-        meta_fp: a file-object with string write access to write JSON to
+        json_stream: a TextIO stream with write access to write JSON to
     """
     schema = AnnotationsSchema()
     result = schema.dumps({'faces': faces})
-    meta_fp.write(result.data)
+    json_stream.write(result.data)
 
 
-def load_meta(meta_fp):
-    """Deserializes the JSON metadata from the given file-object (string) with
+def load_json(json_stream):
+    """Deserializes the JSON metadata from the given TextIO stream using
     marshmallow and returns the resulting object.
 
     Args:
-        meta_fp: a file-object with string read access containing the metadata
+        json_stream: a TextIO stream with read access containing the JSON metadata
 
     Returns:
         a metadata object based on annotations from the Google Vision API.
     """
     schema = AnnotationsSchema()
-    result = schema.loads(meta_fp.read())
+    result = schema.loads(json_stream.read())
     return result.data
 
 
-def download_meta(meta_uri):
+def download_json(json_uri):
     """Downloads the JSON metadata at the given URI, deserializes it with
     marshmallow, and returns the resulting object.
+
+    http://docs.python-requests.org/en/master/user/quickstart/
 
     Args:
         image_uri: an metadata uri, e.g. 'http://cdn/path/to/image-meta.json'
@@ -109,8 +115,8 @@ def download_meta(meta_uri):
     Returns:
         a metadata object based on annotations from the Google Vision API.
     """
-    print('Downloading metadata: {} ...'.format(meta_uri))
-    response = requests.get(meta_uri)
+    print('Downloading metadata: {} ...'.format(json_uri))
+    response = requests.get(json_uri)
     print('...download completed.')
     schema = AnnotationsSchema()
     result = schema.loads(response.text)
@@ -135,21 +141,21 @@ def download_image(image_uri):
     return Image.open(BytesIO(response.content))
 
 
-def orient_image(input_fp, output_fp):
-    """Rotates the given image file based on EXIF orientation metadata and
-    exports the result to the given destination file.
+def orient_image(input_stream, output_stream):
+    """Rotates the image in the given BufferedIO based on its EXIF orientation
+    metadata, then exports the result to the given destination BufferedIO.
 
     https://stackoverflow.com/questions/4228530/pil-thumbnail-is-rotating-my-image
 
     Args:
-        input_fp: an image file-object with EXIF metadata
-        output_fp: a file-object to save the result to
+        input_stream: a BufferedIO image file-object with EXIF metadata
+        output_stream: a file-object to save the result to
     """
     tags = []
-    tags = exifread.process_file(input_fp)
-    input_fp.seek(0) # Reset the file pointer, so we can read the file again
+    tags = exifread.process_file(input_stream)
+    input_stream.seek(0) # Reset the file pointer, so we can read the file again
 
-    image = Image.open(input_fp)
+    image = Image.open(input_stream)
     orientation_key = 'Image Orientation'
     if tags and orientation_key in tags:
         orientation_tag = tags[orientation_key]
@@ -165,7 +171,7 @@ def orient_image(input_fp, output_fp):
                 image = image.rotate(90, expand=True)
                 print('rotated image 90 degrees')
 
-    image.save(output_fp)
+    image.save(output_stream)
     image.close()
 
 
@@ -182,7 +188,7 @@ def get_id_name(filename):
     return str(timestamp) + '_' + secure_filename(filename)
 
 
-def get_meta_name(input_filename):
+def get_json_name(input_filename):
     """Makes a faces metadata filename based on the given input filename.
 
     Args:

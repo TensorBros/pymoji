@@ -9,7 +9,7 @@ from google.cloud import error_reporting
 from pymoji import APP, PROJECT_ID
 from pymoji.constants import CLOUD_ROOT, DEMO_PATH, OUTPUT_DIR
 from pymoji.faces import process_cloud, process_local
-from pymoji.utils import allowed_file, download_meta, get_meta_name, get_output_name, load_meta
+from pymoji.utils import allowed_file, download_json, get_json_name, get_output_name, load_json
 
 
 @APP.after_request
@@ -53,28 +53,30 @@ def emojivision(id_filename):
         id_filename: a unique filename string
     """
     output_filename = get_output_name(id_filename)
-    meta_filename = get_meta_name(id_filename)
-
-    # hidden mode for live debugging
-    is_haxxx_mode = request.args.get('haxxx', False)
+    json_filename = get_json_name(id_filename)
+    input_image_url = None
+    output_image_url = None
+    json_url = None
 
     if APP.testing:
         input_image_url = url_for('static', filename='uploads/' + id_filename)
         output_image_url = url_for('static', filename='gen/' + output_filename)
-        meta_url = url_for('static', filename='gen/' + meta_filename)
+        json_url = url_for('static', filename='gen/' + json_filename)
     else:
         input_image_url = CLOUD_ROOT + PROJECT_ID + '/uploads/' + id_filename
         output_image_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + output_filename
-        meta_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + meta_filename
+        json_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + json_filename
 
-    meta = None
+    # hidden mode for live debugging
+    is_haxxx_mode = request.args.get('haxxx', APP.debug)
+    json_data = None
     if is_haxxx_mode:
         if APP.testing:
-            meta_path = os.path.join(OUTPUT_DIR, meta_filename)
-            with open(meta_path) as meta_file:
-                meta = load_meta(meta_file)
+            json_path = os.path.join(OUTPUT_DIR, json_filename)
+            with open(json_path) as json_file:
+                json_data = load_json(json_file)
         else:
-            meta = download_meta(meta_url)
+            json_data = download_json(json_url)
 
     return render_template(
         'result.html',
@@ -82,8 +84,8 @@ def emojivision(id_filename):
         is_haxxx_mode=is_haxxx_mode,
         input_image_url=input_image_url,
         output_image_url=output_image_url,
-        meta_url=meta_url,
-        meta=meta
+        json_url=json_url,
+        json_data=json_data
     )
 
 
