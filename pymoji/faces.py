@@ -111,7 +111,7 @@ def process_local(image_stream, input_filename):
             json_path = os.path.join(OUTPUT_DIR, json_filename)
             print('Saving to file: {}'.format(json_path))
             with open(json_path, 'w') as json_file:
-                write_json(faces, json_file)
+                write_json({'faces': faces}, json_file)
 
             output_filename = get_output_name(id_filename)
             output_path = os.path.join(OUTPUT_DIR, output_filename)
@@ -158,7 +158,7 @@ def process_cloud(image_stream, input_filename, mime):
 
         if faces:
             with NamedTemporaryFile(suffix=suffix, mode='w+') as json_stream:
-                write_json(faces, json_stream)
+                write_json({'faces': faces}, json_stream)
                 json_stream.seek(0) # reset the stream for next use
 
                 json_filename = get_json_name(id_filename)
