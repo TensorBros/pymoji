@@ -8,8 +8,8 @@ from google.cloud.vision import types
 from pymoji import PROJECT_ID, MAX_RESULTS
 from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
-from pymoji.utils import allowed_file, get_id_name, get_extension, get_json_name, \
-    get_output_name, orient_image, save_to_cloud, write_json
+from pymoji.utils import allowed_file, get_id_name, get_json_name, get_output_name, \
+    orient_image, save_to_cloud, write_json
 
 
 def detect_faces(input_stream=None, input_uri=None):
@@ -144,7 +144,7 @@ def process_cloud(image_stream, input_filename, mime):
     id_filename = get_id_name(input_filename)
 
     # suffix for named temp files so pillow can auto match file encodings
-    suffix = '.' + get_extension(input_filename)
+    _, suffix = os.path.splitext(input_filename)
     with NamedTemporaryFile(suffix=suffix) as input_stream:
         orient_image(image_stream, input_stream) # rotate based on EXIF
         input_stream.seek(0) # reset the stream for next use
