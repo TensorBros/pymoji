@@ -21,16 +21,10 @@ from pymoji.constants import ALLOWED_EXTENSIONS
 def shell(cmd):
     """Convenience wrapper function."""
     print(cmd)
-    res = os.system(cmd)
-    if res:
+    result = os.system(cmd)
+    if result:
+        print("Error code: {}".format(result))
         raise Exception("Error in script:\n{0}".format(cmd))
-
-
-def get_extension(filename):
-    """Returns the extension of the given filename."""
-    if '.' not in filename:
-        return ''
-    return filename.rsplit('.', 1)[1].lower()
 
 
 def allowed_file(filename):
@@ -44,7 +38,9 @@ def allowed_file(filename):
     Result:
         True iff the filename is allowed.
     """
-    return get_extension(filename) in ALLOWED_EXTENSIONS
+    _, extension = os.path.splitext(filename)
+    clean_extension = extension.split('.')[-1].lower()
+    return clean_extension in ALLOWED_EXTENSIONS
 
 
 def save_to_cloud(data_stream, filename, content_type):
@@ -203,8 +199,8 @@ def get_json_name(input_filename):
     Returns:
         a filename string, e.g. "face-input-meta.json"
     """
-    filename = input_filename.split('.')[-2]
-    return filename + "-meta.json"
+    root, _ = os.path.splitext(input_filename)
+    return "{}-meta.json".format(root)
 
 
 def get_output_name(input_filename):
@@ -216,9 +212,8 @@ def get_output_name(input_filename):
     Returns:
         a filename string, e.g. "face-input-output.jpg"
     """
-    filename = input_filename.split('.')[-2]
-    extension = get_extension(input_filename)
-    return filename + "-output." + extension
+    root, extension = os.path.splitext(input_filename)
+    return "{}-output{}".format(root, extension)
 
 
 def process_folder(path, file_processor):
