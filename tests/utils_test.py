@@ -1,7 +1,9 @@
 """see pymoji/utils.py"""
+from tempfile import NamedTemporaryFile
 from time import sleep
 
 from pymoji import utils
+from tests import TEST_JSON_PATH
 
 
 def test_allowed_file():
@@ -18,12 +20,25 @@ def test_save_to_cloud():
 
 def test_write_json():
     """ tests pymoji.utils.write_json"""
-    pass
+    # assumes utils.load_json works correctly
+    with open(TEST_JSON_PATH) as json_file:
+        json_data = utils.load_json(json_file)
+        with NamedTemporaryFile(suffix='.json', mode='w+') as json_stream:
+            utils.write_json(json_data, json_stream)
+            json_stream.seek(0)
+            loaded_data = utils.load_json(json_stream)
+            assert loaded_data == json_data
 
 
 def test_load_json():
     """ tests pymoji.utils.load_json"""
-    pass
+    with open(TEST_JSON_PATH) as json_file:
+        face = utils.load_json(json_file)['faces'][0]
+        assert face['detection_confidence'] == 0.9950907230377197
+        assert face['joy_likelihood'] == 1
+        assert face['headwear_likelihood'] == 5
+        assert face['bounding_poly']['vertices'][0]['x'] == 395
+        assert face['bounding_poly']['vertices'][0]['y'] == 178
 
 
 def test_download_json():
@@ -65,6 +80,6 @@ def test_get_output_name():
     assert utils.get_output_name('__stoo-pid.file-name.PNG') == '__stoo-pid.file-name-output.PNG'
 
 
-def test_process_folderlder():
+def test_process_folder():
     """ tests pymoji.utils.process_folder"""
     pass

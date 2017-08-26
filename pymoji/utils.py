@@ -77,16 +77,16 @@ def save_to_cloud(data_stream, filename, content_type):
     return blob.public_url
 
 
-def write_json(faces, json_stream):
+def write_json(annotation_data, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
     resulting JSON string to the given TextIO stream.
 
     Args:
-        faces: a list of annotation objects from the Google Vision API
+        annotation_data: a metadata object matching models.AnnotationsSchema
         json_stream: a TextIO stream with write access to write JSON to
     """
     schema = AnnotationsSchema()
-    result = schema.dumps({'faces': faces})
+    result = schema.dumps(annotation_data)
     json_stream.write(result.data)
 
 
@@ -98,7 +98,7 @@ def load_json(json_stream):
         json_stream: a TextIO stream with read access containing the JSON metadata
 
     Returns:
-        a metadata object based on annotations from the Google Vision API.
+        a metadata object matching models.AnnotationsSchema
     """
     schema = AnnotationsSchema()
     result = schema.loads(json_stream.read())
