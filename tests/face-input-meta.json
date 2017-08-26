@@ -1,0 +1,1 @@
+{"faces": [{"surprise_likelihood": 1, "sorrow_likelihood": 1, "bounding_poly": {"vertices": [{"x": 395, "y": 178}, {"x": 740, "y": 178}, {"x": 740, "y": 579}, {"x": 395, "y": 579}]}, "detection_confidence": 0.9950907230377197, "headwear_likelihood": 5, "anger_likelihood": 1, "joy_likelihood": 1}]}
