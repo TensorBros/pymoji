@@ -52,5 +52,10 @@ def test():
     #shell("cd static/js && npm test")
 
 
+@MANAGER.command
+def pip():
+    """Runs all project tests!"""
+    shell("pip install -r requirements.txt")
+
 if __name__ == "__main__":
     MANAGER.run()
