@@ -4,7 +4,7 @@
 
 <h3>📸 Upload 📸</h3>
 
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data" id="upload-emoji-form">
   <div class="panel panel-default" style="max-width: 432px;">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -19,8 +19,20 @@
       </div>
       </div>
     <div class="panel-footer">
-      <button type="submit" value="Upload" class="btn btn-success">🚀 Launch 🚀</button>
+      <button type="submit" value="Upload" class="btn btn-success" id="upload-emoji-button">
+        🚀 Launch 🚀
+      </button>
     </div>
 </form>
+
+<script type="text/javascript">
+  /* Prevent multiple form submissions by disabling submit button after first event. */
+  var uploadForm = document.getElementById("upload-emoji-form");
+  var uploadButton = document.getElementById("upload-emoji-button");
+  var disableSubmitButton = function() {
+    uploadButton.setAttribute('disabled', 'disabled');
+  }
+  uploadForm.addEventListener('submit', disableSubmitButton, false);
+</script>
 
 {% endblock %}
