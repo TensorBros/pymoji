@@ -4,7 +4,7 @@ http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
 https://www.emojione.com/emoji/v3
 http://unicode.org/emoji/charts/full-emoji-list.html
 """
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
@@ -155,5 +155,27 @@ def replace_faces(input_stream, faces, output_stream):
     output_image = Image.open(input_stream)
     for face in faces:
         render_emoji(output_image, face)
+    output_image.save(output_stream)
+    output_image.close()
+
+
+def highlight_faces(input_stream, faces, output_stream):
+    """Draws a bounding box around all faces in the given input image based on
+    the given face annotation data, then writes to the given output.
+
+    The input and output may be either a filename (string), pathlib.Path object,
+    or BufferedIO stream with read and write access, respectively.
+
+    Args:
+        input_stream: a file-like-object containing an image.
+        faces: a list of face annotation objects from the Google Vision API.
+        output_stream: a file-like-object to write the result to.
+    """
+    output_image = Image.open(input_stream)
+    draw = ImageDraw.Draw(output_image)
+    for face in faces:
+        box = [(vertex.x, vertex.y)
+               for vertex in face.bounding_poly.vertices]
+        draw.line(box + [box[0]], width=5, fill='#00ff00')
     output_image.save(output_stream)
     output_image.close()
