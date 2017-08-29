@@ -4,6 +4,9 @@ Flask-Script==2.0.5
 gunicorn==19.7.1
 marshmallow==2.13.6
 
+# robot for server
+slackclient==1.0.7
+
 # testing and code quality
 pylint==1.7.2
 pylint-flask==0.5
