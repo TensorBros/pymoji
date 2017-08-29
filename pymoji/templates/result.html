@@ -3,20 +3,18 @@
 
 {% block content %}
 
-<h3>✨🕶 Emojivision 🕶✨</h3>
-
-<div class="panel panel-default" style="max-width: 432px;">
+<div class="panel panel-default">
   <div class="panel-heading">
-    <h4 class="panel-title">
-      {{ id_filename}}
-    </h4>
+    <div class="panel-title">
+      🕶 Emojivision 🕶
+    </div>
   </div>
   <div class="panel-body">
     <div class="" style="overflow: hidden;">
-      <img src="{{input_image_url}}" alt="🚧 No 📸 found! 🚧" width="400">
+      <img src="{{input_image_url}}" alt="🚧 No 📸 found! 🚧" class="img-responsive">
     </div>
     <div class="" style="overflow: hidden;">
-      <img src="{{output_image_url}}" alt="🚧 No 📸 found! 🚧" width="400">
+      <img src="{{output_image_url}}" alt="🚧 No 📸 found! 🚧" class="img-responsive">
     </div>
     <div class="panel-footer">
       <a href="{{ url_for('index', id_filename=id_filename) }}" class="btn btn-primary">
@@ -27,11 +25,11 @@
 </div>
 
 {%- if is_haxxx_mode %}
-  <div class="panel panel-info" style="max-width: 432px;">
+  <div class="panel panel-info">
     <div class="panel-heading">
-      <h4 class="panel-title">
+      <div class="panel-title">
         Annotations
-      </h4>
+      </div>
     </div>
     <div class="panel-body">
       {{ json_data | pprint }}
