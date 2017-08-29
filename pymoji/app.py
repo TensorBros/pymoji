@@ -114,8 +114,10 @@ def index():
             else:
                 id_filename = process_cloud(image, image.filename, image.content_type)
 
+            flash('Successfully processed: {}'.format(id_filename))
             return redirect(url_for('emojivision', id_filename=id_filename))
 
+        flash('File type not allowed')
         return redirect(request.url)
 
     return render_template("form.html", id_filename=id_filename)
