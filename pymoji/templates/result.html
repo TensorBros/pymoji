@@ -2,40 +2,40 @@
 {% set active_page = "emojivision" %}
 
 {% block content %}
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <div class="panel-title">
-      🕶 Emojivision 🕶
-    </div>
-  </div>
-  <div class="panel-body">
-    <img src="{{input_image_url}}" alt="🚧 missing image 🚧" class="img-responsive">
-    <img src="{{output_image_url}}" alt="🚧 missing image 🚧" class="img-responsive">
-  </div>
-  <div class="panel-footer">
-    <a href="{{ url_for('index', id_filename=id_filename) }}" class="btn btn-primary">
-      ⬅ 📸 New Upload 📸
-    </a>
-  </div>
-</div>
-
-{%- if is_haxxx_mode %}
-  <div class="panel panel-info">
+<div class="panel-group">
+  <div class="panel panel-default">
     <div class="panel-heading">
       <div class="panel-title">
-        Annotations
+        🕶 Emojivision 🕶
       </div>
     </div>
     <div class="panel-body">
-      {{ json_data | pprint }}
+      <img src="{{input_image_url}}" alt="🚧 missing image 🚧" class="img-responsive">
+      <img src="{{output_image_url}}" alt="🚧 missing image 🚧" class="img-responsive">
     </div>
     <div class="panel-footer">
-      <a href="{{ json_url }}" class="">
-        {{ json_url }}
+      <a href="{{ url_for('index', id_filename=id_filename) }}" class="btn btn-primary">
+        ⬅ 📸 New Upload 📸
       </a>
     </div>
   </div>
-{%- endif %}
 
+  {%- if is_haxxx_mode %}
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <div class="panel-title">
+          Annotations
+        </div>
+      </div>
+      <div class="panel-body">
+        {{ json_data | pprint }}
+      </div>
+      <div class="panel-footer">
+        <a href="{{ json_url }}" class="">
+          {{ json_url }}
+        </a>
+      </div>
+    </div>
+  {%- endif %}
+</div>
 {% endblock %}
