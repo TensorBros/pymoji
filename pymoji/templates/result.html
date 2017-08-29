@@ -10,17 +10,13 @@
     </div>
   </div>
   <div class="panel-body">
-    <div class="" style="overflow: hidden;">
-      <img src="{{input_image_url}}" alt="🚧 No 📸 found! 🚧" class="img-responsive">
-    </div>
-    <div class="" style="overflow: hidden;">
-      <img src="{{output_image_url}}" alt="🚧 No 📸 found! 🚧" class="img-responsive">
-    </div>
-    <div class="panel-footer">
-      <a href="{{ url_for('index', id_filename=id_filename) }}" class="btn btn-primary">
-        ⬅ 📸 New Upload 📸
-      </a>
-    </div>
+    <img src="{{input_image_url}}" alt="🚧 missing image 🚧" class="img-responsive">
+    <img src="{{output_image_url}}" alt="🚧 missing image 🚧" class="img-responsive">
+  </div>
+  <div class="panel-footer">
+    <a href="{{ url_for('index', id_filename=id_filename) }}" class="btn btn-primary">
+      ⬅ 📸 New Upload 📸
+    </a>
   </div>
 </div>
 
