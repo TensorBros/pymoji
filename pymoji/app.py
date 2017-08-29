@@ -33,12 +33,21 @@ def after_request(response):
 @APP.route('/emojivision/')
 def emojivision_index():
     """Launches a demo run and redirects to the results."""
-    input_filename = 'demo.jpg'
     with open(DEMO_PATH, 'rb') as image:
+        run_args = {
+            'image_stream': image,
+            'filename': 'demo.jpg',
+            'renderer': request.form.get('renderer', 'emoji')
+        }
+        print('Processing run: {}'.format(run_args))
+
+        id_filename = None
         if APP.testing:
-            id_filename = process_local(image, input_filename)
+            id_filename = process_local(**run_args)
         else:
-            id_filename = process_cloud(image, input_filename, 'image/jpeg')
+            run_args['mime_type'] = 'image/jpeg'
+            id_filename = process_cloud(**run_args)
+
         return redirect(url_for('emojivision', id_filename=id_filename))
 
     # fallback on root index
@@ -97,14 +106,20 @@ def index():
 
         # handle valid files
         if image and allowed_file(image.filename):
+            run_args = {
+                'image_stream': image,
+                'filename': image.filename,
+                'renderer': request.form.get('renderer', 'emoji')
+            }
+            print('Processing run: {}'.format(run_args))
+
             id_filename = None
-
             if APP.testing:
-                id_filename = process_local(image, image.filename)
+                id_filename = process_local(**run_args)
             else:
-                id_filename = process_cloud(image, image.filename, image.content_type)
+                run_args['mime_type'] = image.content_type
+                id_filename = process_cloud(**run_args)
 
-            flash('Successfully processed: {}'.format(id_filename))
             return redirect(url_for('emojivision', id_filename=id_filename))
 
         flash('File type not allowed')
