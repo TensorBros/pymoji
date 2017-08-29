@@ -52,48 +52,38 @@ def emojivision(id_filename):
     Args:
         id_filename: a unique filename string
     """
+    kwargs = {} # data payload for template
+
     output_filename = get_output_name(id_filename)
     json_filename = get_json_name(id_filename)
-    input_image_url = None
-    output_image_url = None
-    json_url = None
 
     if APP.testing:
-        input_image_url = url_for('static', filename='uploads/' + id_filename)
-        output_image_url = url_for('static', filename='gen/' + output_filename)
-        json_url = url_for('static', filename='gen/' + json_filename)
+        kwargs['input_image_url'] = url_for('static', filename='uploads/' + id_filename)
+        kwargs['output_image_url'] = url_for('static', filename='gen/' + output_filename)
+        kwargs['json_url'] = url_for('static', filename='gen/' + json_filename)
     else:
-        input_image_url = CLOUD_ROOT + PROJECT_ID + '/uploads/' + id_filename
-        output_image_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + output_filename
-        json_url = CLOUD_ROOT + PROJECT_ID + '/gen/' + json_filename
+        kwargs['input_image_url'] = CLOUD_ROOT + PROJECT_ID + '/uploads/' + id_filename
+        kwargs['output_image_url'] = CLOUD_ROOT + PROJECT_ID + '/gen/' + output_filename
+        kwargs['json_url'] = CLOUD_ROOT + PROJECT_ID + '/gen/' + json_filename
 
     # hidden mode for live debugging
     is_haxxx_mode = request.args.get('haxxx', APP.debug)
-    json_data = None
     if is_haxxx_mode:
+        kwargs['is_haxxx_mode'] = is_haxxx_mode
         if APP.testing:
             json_path = os.path.join(OUTPUT_DIR, json_filename)
             with open(json_path) as json_file:
-                json_data = load_json(json_file)
+                kwargs['json_data'] = load_json(json_file)
         else:
-            json_data = download_json(json_url)
+            kwargs['json_data'] = download_json(kwargs['json_url'])
 
-    return render_template(
-        'result.html',
-        id_filename=id_filename,
-        is_haxxx_mode=is_haxxx_mode,
-        input_image_url=input_image_url,
-        output_image_url=output_image_url,
-        json_url=json_url,
-        json_data=json_data
-    )
+    return render_template('result.html', **kwargs)
 
 
 @APP.route('/', methods=['GET', 'POST'])
 def index():
     """Serves the upload form index page. Sucessful submissions redirect to the
     results page for the uploaded ID-filename."""
-    id_filename = request.args.get('id_filename', '')
     if request.method == 'POST':
         # check if the post request has an image
         if 'image' not in request.files:
@@ -120,7 +110,18 @@ def index():
         flash('File type not allowed')
         return redirect(request.url)
 
-    return render_template("form.html", id_filename=id_filename)
+    kwargs = {}
+
+    # hidden mode for live debugging
+    is_haxxx_mode = request.args.get('haxxx', APP.debug)
+    if is_haxxx_mode:
+        kwargs['is_haxxx_mode'] = is_haxxx_mode
+
+    id_filename = request.args.get('id_filename', '')
+    if id_filename:
+        kwargs['id_filename'] = id_filename
+
+    return render_template("form.html", **kwargs)
 
 
 @APP.route('/favicon.ico')
