@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+    /* HACK - limit image size by limiting max panel width */
+    .panel {
+      max-width: 500px;
+    }
+    </style>
     {% if not config.get('TESTING') -%}
     <script type="text/javascript">
       window['_fs_debug'] = false;
