@@ -80,20 +80,27 @@ def save_to_cloud(data_stream, filename, content_type):
 
 def report_upload_to_slack(id_filename):
     """Webhook to let Slack know someone's uploaded to our google cloud
-    
+    If this hook fails, it does not block.
+
     Args:
         id_filename: the link-about filename we've created to store and reference this upload
     """
-    
-    url = 'https://hooks.slack.com/services/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'
-    message_1 = ("At %s, someone uploaded this:" % timestamp_for_logs())
-    message_2 = ("\n<http://tensorbros.com/emojivision/%s|%s>" % (id_filename, id_filename))
-    payload = {"text": message_1 + message_2, "username": "pymoji_webhook", "icon_emoji": ":pymoji_bot:"}
-    headers = {'content-type': 'application/json'}
+    status = 'Webhook to slack failed!'
+    try:
+        url = 'https://hooks.slack.com/services/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'
+        message_1 = ("At %s, someone uploaded this:" % timestamp_for_logs())
+        message_2 = ("\n<http://tensorbros.com/emojivision/%s|%s>" % (id_filename, id_filename))
+        payload = {
+          "text": message_1 + message_2,
+          "username": "pymoji_webhook",
+          "icon_emoji": ":pymoji_bot:"
+          }
+        headers = {'content-type': 'application/json'}
 
-    response = requests.post(url, json=payload, headers=headers)
-    
-    return response.status_code
+        response = requests.post(url, json=payload, headers=headers)
+        status = response.status_code
+    finally:
+        return status #pylint: disable=lost-exception
 
 def write_json(annotation_data, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
