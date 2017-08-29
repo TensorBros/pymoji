@@ -18,13 +18,14 @@ from pymoji.models import AnnotationsSchema
 from pymoji.constants import ALLOWED_EXTENSIONS
 
 
-def shell(cmd):
+def shell(cmd, fail_on_error=True):
     """Convenience wrapper function."""
     print(cmd)
     result = os.system(cmd)
-    if result:
+    if fail_on_error and result:
         print("Error code: {}".format(result))
         raise Exception("Error in script:\n{0}".format(cmd))
+    return result
 
 
 def allowed_file(filename):
