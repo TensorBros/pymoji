@@ -9,7 +9,8 @@ from google.cloud import error_reporting
 from pymoji import APP, PROJECT_ID
 from pymoji.constants import CLOUD_ROOT, DEMO_PATH, OUTPUT_DIR
 from pymoji.faces import process_cloud, process_local
-from pymoji.utils import allowed_file, download_json, get_json_name, get_output_name, load_json
+from pymoji.utils import (allowed_file, download_json, get_json_name, get_output_name,
+  load_json, report_upload_to_slack)
 
 
 @APP.after_request
@@ -34,6 +35,7 @@ def after_request(response):
 def emojivision_index():
     """Launches a demo run and redirects to the results."""
     input_filename = 'demo.jpg'
+
     with open(DEMO_PATH, 'rb') as image:
         if APP.testing:
             id_filename = process_local(image, input_filename)
@@ -113,6 +115,10 @@ def index():
                 id_filename = process_local(image, image.filename)
             else:
                 id_filename = process_cloud(image, image.filename, image.content_type)
+
+            # Report to slack
+            print('Firing webhook to slack#robot_parade about', id_filename)
+            print('Status of webhook: %s' % report_upload_to_slack(id_filename))
 
             return redirect(url_for('emojivision', id_filename=id_filename))
 

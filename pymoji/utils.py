@@ -59,6 +59,7 @@ def save_to_cloud(data_stream, filename, content_type):
         a publicly accessible URL string
     """
     print('Uploading to Google Cloud: {} ...'.format(filename))
+
     # Create a Cloud Storage client.
     gcs = storage.Client(project=PROJECT_ID)
 
@@ -77,6 +78,22 @@ def save_to_cloud(data_stream, filename, content_type):
     # The public URL can be used to directly access the uploaded file via HTTP.
     return blob.public_url
 
+def report_upload_to_slack(id_filename):
+    """Webhook to let Slack know someone's uploaded to our google cloud
+    
+    Args:
+        id_filename: the link-about filename we've created to store and reference this upload
+    """
+    
+    url = 'https://hooks.slack.com/services/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'
+    message_1 = ("At %s, someone uploaded this:" % timestamp_for_logs())
+    message_2 = ("\n<http://tensorbros.com/emojivision/%s|%s>" % (id_filename, id_filename))
+    payload = {"text": message_1 + message_2, "username": "pymoji_webhook", "icon_emoji": ":pymoji_bot:"}
+    headers = {'content-type': 'application/json'}
+
+    response = requests.post(url, json=payload, headers=headers)
+    
+    return response.status_code
 
 def write_json(annotation_data, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
@@ -187,9 +204,13 @@ def get_id_name(filename):
     Returns:
         a unique-ish filename string, e.g. "1503280514351_face-input.jpg"
     """
-    timestamp = int(round(time.time() * 1000))
-    return str(timestamp) + '_' + secure_filename(filename)
+    timestamp_in_seconds = int(round(time.time() * 1000))
+    return str(timestamp_in_seconds) + '_' + secure_filename(filename)
 
+def timestamp_for_logs():
+    """Returns consistent timestamp for the app logs
+    """
+    return time.strftime('%A, %d %b %Y %l:%M %p')
 
 def get_json_name(input_filename):
     """Makes a faces metadata filename based on the given input filename.
