@@ -13,9 +13,12 @@ MANAGER = Manager(APP)
 
 @MANAGER.command
 def build():
-    """lint + test"""
-    lint()
+    """test + lint
+
+    You'll know if shit's broken first; then you'll get to hear grief about your line length
+    """
     test()
+    lint()
 
 
 @MANAGER.command
