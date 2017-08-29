@@ -8,6 +8,20 @@
     <meta name="description" content="TensorBros: Emojivision">
     <link rel="shortcut icon" href="/static/favicon.ico" />
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <style>
+    /* spinner animation styles, loosely based on https://www.w3schools.com/howto/howto_css_loader.asp */
+    .glyphicon-spin {
+      animation: spin 3s infinite linear;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(359deg);
+      }
+    }
+    </style>
     {% if not config.get('TESTING') -%}
     <script type="text/javascript">
       window['_fs_debug'] = false;
