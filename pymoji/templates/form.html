@@ -28,7 +28,7 @@
         <div class="form-group">
           <label for="image">take a photo or choose an image</label>
           <input type="file" name="image" id="image" class="form-control"
-            accept="image/*"  />
+            accept="image/*" required="true" />
         </div>
       </div>
       <div class="panel-footer">
@@ -39,6 +39,26 @@
         <span class="glyphicon glyphicon-cd glyphicon-spin hidden" id="upload-spinner"></span>
       </div>
     </div>
+
+    {%- if is_haxxx_mode %}
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <div class="panel-title">
+            Settings
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <div class="radio"><label>
+              <input type="radio" name="renderer" value="emoji" checked="true"> emoji
+            </label></div>
+            <div class="radio"><label>
+              <input type="radio" name="renderer" value="bounding_box"> bounding-boxes
+            </label></div>
+          </div>
+        </div>
+      </div>
+    {%- endif %}
   </div>
 </form>
 
