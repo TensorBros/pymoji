@@ -11,7 +11,7 @@ from PIL import Image
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
-from pymoji.vision import detect_labels
+from pymoji.vision import detect_labels, to_vision_image
 
 
 # dictionary object to use as in-memory cache of emoji images
@@ -67,13 +67,45 @@ JOY_CODES = [
 # "1f644" # face with rolling eyes
 
 
-def get_emoji(code, width, height):
-    """Returns the emoji for the given emoji code as a RGBA PIL.Image scaled
-    to the given width and height. Maintains a cache of original templates
-    (CDN source files are 128x128 PNGs).
+def compute_emoji_box(image, face):
+    """Awesome helper"""
+    face_top_left = face.bounding_poly.vertices[0]
+    face_left = face_top_left.x
+    face_top = face_top_left.y
+
+    face_bottom_right = face.bounding_poly.vertices[2]
+    face_right = face_bottom_right.x
+    face_bottom = face_bottom_right.y
+
+    # compute height and width (top-left corner is origin)
+    face_height = face_top - face_bottom
+    face_width = face_right - face_left
+
+    # compute extra padding to approximate head-size
+    width_pad = face_width * 0.1
+    height_pad = face_height * 0.1
+
+    # original image bounding box
+    (image_left, image_top, image_right, image_bottom) = image.getbbox()
+
+    # add padding, use max and min to limit based on outer image
+    left = max(image_left, int(face_left - width_pad))
+    top = max(image_top, int(face_top - height_pad))
+    right = min(image_right, int(face_right + width_pad))
+    bottom = min(image_bottom, int(face_bottom + height_pad))
+
+    return (left, top, right, bottom)
+
+
+def get_emoji_image(code, box):
+    """Creates an emoji RGBA PIL.Image for the given code, scaled to the
+    given bounding box. Maintains a cache of original templates (CDN source
+    files are 128x128 PNGs).
 
     Args:
         code: a string containing the code for the desired emoji.
+        box: a 4-tuple defining the left, upper, right, and lower pixel coordinate
+            e.g. (0, 0, 128, 128)
 
     Returns:
         a scaled RGBA PIL.Image of the emoji.
@@ -83,6 +115,13 @@ def get_emoji(code, width, height):
         emoji_url = EMOJI_CDN_PATH + code + '.png'
         emoji = download_image(emoji_url).convert('RGBA')
         EMOJI[code] = emoji
+
+    # compute height and width (top-left corner is origin)
+    (left, top, right, bottom) = box
+    height = bottom - top
+    width = right - left
+
+    # get image from cache and resize
     return EMOJI[code].resize((width, height), resample=0)
 
 
@@ -109,6 +148,43 @@ def get_code(likelihood, code_list):
     return DEFAULT_CODE
 
 
+def compute_emoji_code(image, face, emoji_box):
+    """Bodacious helper"""
+    # check likelihood scores in roughly inverse-frequency order
+    # i.e. ensure that rare sorrow emoji outrank common joy emoji
+    if face.sorrow_likelihood > VERY_UNLIKELY:
+        return get_code(face.sorrow_likelihood, SORROW_CODES)
+    elif face.anger_likelihood > VERY_UNLIKELY:
+        return get_code(face.anger_likelihood, ANGER_CODES)
+    elif face.surprise_likelihood > VERY_UNLIKELY:
+        return get_code(face.surprise_likelihood, SURPRISE_CODES)
+    elif face.headwear_likelihood > POSSIBLE:
+        return "1f920" # cowboy hat face
+    elif face.joy_likelihood > VERY_UNLIKELY:
+        return get_code(face.joy_likelihood, JOY_CODES)
+    else:
+        # BRING OUT THE BIG GUNS - analyze labels on individual head
+
+        # crop head + save into temp file
+        head_image = image.crop(emoji_box)
+        with TemporaryFile() as head_stream:
+            head_image.save(head_stream, format='JPEG')
+            head_stream.seek(0)
+
+            # submit head image for labels
+            gv_head_image = to_vision_image(input_stream=head_stream)
+            labels = detect_labels(gv_head_image)
+
+            # greedily convert first interesting label into emoji
+            for label in labels:
+                if label.description == "sunglasses": # at night so I can so I caaaaan
+                    return "1f60e" # smiling face with sunglasses
+                elif label.description == "glasses":
+                    return "1f913" # nerd face
+
+    return DEFAULT_CODE
+
+
 def render_emoji(image, face):
     """Renders an emoji on top of the given image using the given face
     annotation data.
@@ -119,60 +195,10 @@ def render_emoji(image, face):
         image: a PIL.Image
         face: a face annotation object from the Google Vision API.
     """
-    top_left = face.bounding_poly.vertices[0]
-    bottom_right = face.bounding_poly.vertices[2]
-    width = (bottom_right.x - top_left.x)
-    height = (bottom_right.y - top_left.y)
-    emoji_code = DEFAULT_CODE
-
-    # check likelihood scores in roughly inverse-frequency order
-    # i.e. ensure that rare sorrow emoji outrank common joy emoji
-    if face.sorrow_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.sorrow_likelihood, SORROW_CODES)
-    elif face.anger_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.anger_likelihood, ANGER_CODES)
-    elif face.surprise_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.surprise_likelihood, SURPRISE_CODES)
-    elif face.headwear_likelihood > POSSIBLE:
-        emoji_code = "1f920" # cowboy hat face
-    elif face.joy_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.joy_likelihood, JOY_CODES)
-    else:
-        # BRING OUT THE BIG GUNS - analyze labels on individual face
-
-        # compute padding and face crop box
-        width_pad = width * 0.1
-        height_pad = height * 0.1
-        # use max and min to limit padding based on outer image
-        image_box = image.getbbox()
-        face_box = (
-            max(image_box[0], top_left.x - width_pad),
-            max(image_box[1], top_left.y - height_pad),
-            min(image_box[2], bottom_right.x + width_pad),
-            min(image_box[3], bottom_right.y + height_pad)
-        )
-
-        # crop face + save into temp file
-        face_image = image.crop(face_box)
-        with TemporaryFile() as face_stream:
-            face_image.save(face_stream, format='JPEG')
-            face_stream.seek(0)
-
-            # submit face image for labels
-            labels = detect_labels(input_stream=face_stream)
-
-            # greedily convert first interesting label into emoji
-            for label in labels:
-                if label.description == "sunglasses": # at night so I can so I caaaaan
-                    emoji_code = "1f60e" # smiling face with sunglasses
-                    continue
-                elif label.description == "glasses":
-                    emoji_code = "1f913" # nerd face
-                    continue
-
-    # scale and render emoji over bounding box
-    emoji = get_emoji(emoji_code, width, height)
-    image.paste(emoji, (top_left.x, top_left.y), emoji)
+    emoji_box = compute_emoji_box(image, face)
+    emoji_code = compute_emoji_code(image, face, emoji_box)
+    emoji = get_emoji_image(emoji_code, emoji_box)
+    image.paste(emoji, emoji_box, emoji)
 
 
 def replace_faces(input_stream, faces, output_stream):

@@ -7,7 +7,7 @@ from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
 from pymoji.utils import allowed_file, get_id_name, get_json_name, get_output_name, \
     orient_image, save_to_cloud, write_json
-from pymoji.vision import detect_faces
+from pymoji.vision import detect_faces, to_vision_image
 
 
 def process_path(input_path):
@@ -54,7 +54,8 @@ def process_local(image_stream, input_filename):
         orient_image(image_stream, id_file) # rotate based on EXIF
 
     with open(id_path, 'rb') as id_file:
-        faces = detect_faces(input_stream=id_file)
+        gv_image = to_vision_image(input_stream=id_file)
+        faces = detect_faces(gv_image)
         id_file.seek(0) # reset the file pointer for next use
 
         if faces:
@@ -105,7 +106,8 @@ def process_cloud(image_stream, input_filename, mime):
 
         # gs://bucket_name/object_name
         input_uri = "gs://{}/uploads/{}".format(PROJECT_ID, id_filename)
-        faces = detect_faces(input_uri=input_uri)
+        gv_image = to_vision_image(input_uri=input_uri)
+        faces = detect_faces(gv_image)
 
         if faces:
             with NamedTemporaryFile(suffix=suffix, mode='w+') as json_stream:
