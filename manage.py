@@ -57,7 +57,7 @@ def test():
 
 @MANAGER.command
 def install():
-    """Runs all project tests!"""
+    """Installs all project dependencies"""
     shell("pip install -r requirements.txt")
 
 if __name__ == "__main__":
