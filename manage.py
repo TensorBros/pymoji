@@ -13,9 +13,12 @@ MANAGER = Manager(APP)
 
 @MANAGER.command
 def build():
-    """lint + test"""
-    lint()
+    """test + lint
+
+    You'll know if shit's broken first; then you'll get to hear grief about your line length
+    """
     test()
+    lint()
 
 
 @MANAGER.command
@@ -51,6 +54,11 @@ def test():
     shell("pytest")
     #shell("cd static/js && npm test")
 
+
+@MANAGER.command
+def install():
+    """Runs all project tests!"""
+    shell("pip install -r requirements.txt")
 
 if __name__ == "__main__":
     MANAGER.run()

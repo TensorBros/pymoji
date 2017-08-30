@@ -9,7 +9,8 @@ from google.cloud import error_reporting
 from pymoji import APP, PROJECT_ID
 from pymoji.constants import CLOUD_ROOT, DEMO_PATH, OUTPUT_DIR
 from pymoji.faces import process_cloud, process_local
-from pymoji.utils import allowed_file, download_json, get_json_name, get_output_name, load_json
+from pymoji.utils import (allowed_file, download_json, get_json_name, get_output_name,
+  load_json, report_upload_to_slack)
 
 
 @APP.after_request
@@ -119,6 +120,10 @@ def index():
             else:
                 run_args['mime_type'] = image.content_type
                 id_filename = process_cloud(**run_args)
+
+            # Report the upload to slack, non-blocking
+            webhook_status = report_upload_to_slack(id_filename)
+            print('Status of webhook: %s' % webhook_status)
 
             return redirect(url_for('emojivision', id_filename=id_filename))
 
