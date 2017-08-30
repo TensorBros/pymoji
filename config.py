@@ -34,3 +34,4 @@ PROJECT_ID = 'pymoji-176318'
 
 # Face detection params
 MAX_RESULTS = 20
+USE_BIG_GUNS = True # whether or not to fallback on label analysis (slow)
