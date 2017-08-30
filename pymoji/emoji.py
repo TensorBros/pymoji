@@ -68,7 +68,18 @@ JOY_CODES = [
 
 
 def compute_emoji_box(image, face):
-    """Awesome helper"""
+    """Computes a 4-tuple defining the left, upper, right, and lower pixel
+    coordinate for the emoji bounding box based on the given image and face
+    annotation metadata. Remember that the upper-left corner is the origin!
+
+    Args:
+        image: a PIL.Image
+        face: a face annotation object from the Google Vision API.
+
+    Returns:
+        a 4-tuple defining the left, upper, right, and lower pixel coordinate
+            e.g. (0, 0, 128, 128)
+    """
     face_top_left = face.bounding_poly.vertices[0]
     face_left = face_top_left.x
     face_top = face_top_left.y
@@ -104,8 +115,7 @@ def get_emoji_image(code, box):
 
     Args:
         code: a string containing the code for the desired emoji.
-        box: a 4-tuple defining the left, upper, right, and lower pixel coordinate
-            e.g. (0, 0, 128, 128)
+        box: a 4-tuple defining the emoji bounding box (see compute_emoji_box)
 
     Returns:
         a scaled RGBA PIL.Image of the emoji.
@@ -148,8 +158,20 @@ def get_code(likelihood, code_list):
     return DEFAULT_CODE
 
 
-def compute_emoji_code(image, face, emoji_box):
-    """Bodacious helper"""
+def compute_emoji_code(image, face, box):
+    """Computes a 4-tuple defining the left, upper, right, and lower pixel
+    coordinate for the emoji bounding box based on the given image and face
+    annotation metadata. Remember that the upper-left corner is the origin!
+
+    Args:
+        image: a PIL.Image
+        face: a face annotation object from the Google Vision API.
+        box: a 4-tuple defining the emoji bounding box (see compute_emoji_box)
+
+    Returns:
+        an emoji string code
+    """
+
     # check likelihood scores in roughly inverse-frequency order
     # i.e. ensure that rare sorrow emoji outrank common joy emoji
     if face.sorrow_likelihood > VERY_UNLIKELY:
@@ -166,7 +188,7 @@ def compute_emoji_code(image, face, emoji_box):
         # BRING OUT THE BIG GUNS - analyze labels on individual head
 
         # crop head + save into temp file
-        head_image = image.crop(emoji_box)
+        head_image = image.crop(box)
         with TemporaryFile() as head_stream:
             head_image.save(head_stream, format='JPEG')
             head_stream.seek(0)
