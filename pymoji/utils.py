@@ -6,25 +6,29 @@ https://docs.python.org/3/library/io.html
 from io import BytesIO
 import os
 import time
+import logging
 
 import exifread
-from google.cloud import storage
+from google.cloud import storage, error_reporting
 from PIL import Image
 import requests
+from requests.exceptions import Timeout
 from werkzeug.utils import secure_filename
 
 from pymoji import PROJECT_ID
 from pymoji.models import AnnotationsSchema
-from pymoji.constants import ALLOWED_EXTENSIONS
+from pymoji.constants import (ALLOWED_EXTENSIONS, PYMOJI_WEBHOOK_USERNAME,
+    PYMOJI_WEBHOOK_ICON, PYMOJI_WEBHOOK_URL)
 
 
-def shell(cmd):
+def shell(cmd, fail_on_error=True):
     """Convenience wrapper function."""
     print(cmd)
     result = os.system(cmd)
-    if result:
+    if fail_on_error and result:
         print("Error code: {}".format(result))
         raise Exception("Error in script:\n{0}".format(cmd))
+    return result
 
 
 def allowed_file(filename):
@@ -58,6 +62,7 @@ def save_to_cloud(data_stream, filename, content_type):
         a publicly accessible URL string
     """
     print('Uploading to Google Cloud: {} ...'.format(filename))
+
     # Create a Cloud Storage client.
     gcs = storage.Client(project=PROJECT_ID)
 
@@ -76,6 +81,39 @@ def save_to_cloud(data_stream, filename, content_type):
     # The public URL can be used to directly access the uploaded file via HTTP.
     return blob.public_url
 
+def report_upload_to_slack(id_filename):
+    """Webhook to let Slack know someone has uploaded to our google cloud.
+    If this hook fails it times out after 0.5 seconds.
+
+    Args:
+        id_filename: the link-about filename we've created to store and reference this upload
+
+    Returns:
+        an integer status code
+    """
+    url = PYMOJI_WEBHOOK_URL
+    msg_raw = "At {time}, someone uploaded:\n<http://tensorbros.com/emojivision/{file}|{file}>"
+    msg = msg_raw.format(time=timestamp_for_logs(), file=id_filename)
+    payload = {
+      "text": msg,
+      "username": PYMOJI_WEBHOOK_USERNAME,
+      "icon_emoji": PYMOJI_WEBHOOK_ICON
+      }
+    headers = {'content-type': 'application/json'}
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=0.5)
+        status = response.status_code
+    except Timeout:
+        # log the error to google's stackdriver TODO: abstract this
+        error_client = error_reporting.Client(project=PROJECT_ID)
+        error_client.report_exception()
+        logging.error('A timeout occurred during an external request to Slack.')
+
+        # Request Timeout https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.9
+        status = 408
+
+    return status
 
 def write_json(annotation_data, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
@@ -186,9 +224,13 @@ def get_id_name(filename):
     Returns:
         a unique-ish filename string, e.g. "1503280514351_face-input.jpg"
     """
-    timestamp = int(round(time.time() * 1000))
-    return str(timestamp) + '_' + secure_filename(filename)
+    timestamp_in_seconds = int(round(time.time() * 1000))
+    return str(timestamp_in_seconds) + '_' + secure_filename(filename)
 
+def timestamp_for_logs():
+    """Returns consistent timestamp for the app logs
+    """
+    return time.strftime('%A, %d %b %Y %l:%M %p')
 
 def get_json_name(input_filename):
     """Makes a faces metadata filename based on the given input filename.

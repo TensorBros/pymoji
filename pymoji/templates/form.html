@@ -2,28 +2,63 @@
 {% set active_page = "upload" %}
 
 {% block content %}
-
 <form method="POST" enctype="multipart/form-data" id="upload-form">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <div class="panel-title">
-        📸 Upload 📸
+  <div class="panel-group">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="panel panel-danger">
+        <div class="panel-heading">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title">
+          📸 Upload 📸
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label for="image">take a photo or choose an image</label>
+          <input type="file" name="image" id="image" class="form-control"
+            accept="image/*" required="true" />
+        </div>
+      </div>
+      <div class="panel-footer">
+        <button type="submit" value="Upload" class="btn btn-success" id="upload-button">
+          🚀 Launch 🚀
+        </button>
+        <span>&nbsp;</span>
+        <span class="glyphicon glyphicon-cd glyphicon-spin hidden" id="upload-spinner"></span>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="form-group">
-        <label for="image">take a photo or choose an image</label>
-        <input type="file" name="image" id="image" class="form-control"
-          accept="image/*" required="true" />
+
+    {%- if is_haxxx_mode %}
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <div class="panel-title">
+            Settings
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <div class="radio"><label>
+              <input type="radio" name="renderer" value="emoji" checked="true"> emoji
+            </label></div>
+            <div class="radio"><label>
+              <input type="radio" name="renderer" value="bounding_box"> bounding-boxes
+            </label></div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="panel-footer">
-      <button type="submit" value="Upload" class="btn btn-success" id="upload-button">
-        🚀 Launch 🚀
-      </button>
-      <span>&nbsp;</span>
-      <span class="glyphicon glyphicon-cd glyphicon-spin hidden" id="upload-spinner"></span>
-    </div>
+    {%- endif %}
   </div>
 </form>
 
