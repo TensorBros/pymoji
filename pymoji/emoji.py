@@ -8,6 +8,7 @@ from tempfile import TemporaryFile
 
 from PIL import Image
 
+from pymoji import USE_BIG_GUNS
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
@@ -158,15 +159,15 @@ def get_code(likelihood, code_list):
     return DEFAULT_CODE
 
 
-def compute_emoji_code(image, face, box):
-    """Computes a 4-tuple defining the left, upper, right, and lower pixel
-    coordinate for the emoji bounding box based on the given image and face
-    annotation metadata. Remember that the upper-left corner is the origin!
+def compute_emoji_code(image, face, box, use_big_guns=USE_BIG_GUNS):
+    """Computes the 'best' emoji string code for the given face in the given
+    image.
 
     Args:
         image: a PIL.Image
         face: a face annotation object from the Google Vision API.
         box: a 4-tuple defining the emoji bounding box (see compute_emoji_box)
+        use_big_guns: whether or not to fallback on label analysis (slow)
 
     Returns:
         an emoji string code
@@ -184,7 +185,7 @@ def compute_emoji_code(image, face, box):
         return "1f920" # cowboy hat face
     elif face.joy_likelihood > VERY_UNLIKELY:
         return get_code(face.joy_likelihood, JOY_CODES)
-    else:
+    elif use_big_guns:
         # BRING OUT THE BIG GUNS - analyze labels on individual head
 
         # crop head + save into temp file

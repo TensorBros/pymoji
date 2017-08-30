@@ -11,7 +11,8 @@ APP.config.from_pyfile('config.py')
 #APP.config.from_envvar('YOURAPPLICATION_SETTINGS')
 
 # convenience references for other modules to import
-MAX_RESULTS = APP.config['MAX_RESULTS']
+MAX_RESULTS = APP.config.get('MAX_RESULTS', 20)
+USE_BIG_GUNS = APP.config.get('USE_BIG_GUNS', False)
 PROJECT_ID = APP.config['PROJECT_ID']
 
 # Configure logging
