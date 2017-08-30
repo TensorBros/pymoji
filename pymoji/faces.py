@@ -7,7 +7,7 @@ from google.cloud.vision import types
 
 from pymoji import PROJECT_ID, MAX_RESULTS
 from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
-from pymoji.emoji import replace_faces
+from pymoji.emoji import highlight_faces, replace_faces
 from pymoji.utils import allowed_file, get_id_name, get_json_name, get_output_name, \
     orient_image, save_to_cloud, write_json
 
@@ -73,13 +73,13 @@ def process_path(input_path):
     id_filename = None
     if os.path.isfile(input_path) and allowed_file(filename):
         with open(input_path, 'rb') as input_file:
-            id_filename = process_local(input_file, filename)
+            id_filename = process_local(input_file, filename, 'emoji')
     else:
         print('skipped non-image file')
     return id_filename
 
 
-def process_local(image_stream, input_filename):
+def process_local(image_stream, filename, renderer):
     """Local dev server entrypoint that processes the given image and returns
     the ID-filename from the run. Creates the output directory first if necessary.
 
@@ -87,7 +87,7 @@ def process_local(image_stream, input_filename):
 
     Args:
         image_stream: a BufferedIO containing an image
-        input_filename: string filename of the source image
+        filename: string filename of the source image
 
     Returns:
         an ID-filename string for the run
@@ -96,7 +96,7 @@ def process_local(image_stream, input_filename):
         os.makedirs(OUTPUT_DIR)
         print('created output directory {}'.format(OUTPUT_DIR))
 
-    id_filename = get_id_name(input_filename)
+    id_filename = get_id_name(filename)
     id_path = os.path.join(UPLOADS_DIR, id_filename)
     print('Saving to file: {}'.format(id_path))
     with open(id_path, 'wb') as id_file:
@@ -116,12 +116,16 @@ def process_local(image_stream, input_filename):
             output_filename = get_output_name(id_filename)
             output_path = os.path.join(OUTPUT_DIR, output_filename)
             print('Saving to file: {}'.format(output_path))
-            replace_faces(id_file, faces, output_path)
+            with open(output_path, 'w+b') as output_file:
+                if renderer == 'emoji':
+                    replace_faces(id_file, faces, output_file)
+                elif renderer == 'bounding_box':
+                    highlight_faces(id_file, faces, output_file)
 
     return id_filename
 
 
-def process_cloud(image_stream, input_filename, mime):
+def process_cloud(image_stream, filename, mime_type, renderer):
     """Production server entrypoint that processes the given image and returns
     the ID-filename from the run. Uploads both the input and ouput images to
     Google Cloud Storage.
@@ -135,21 +139,21 @@ def process_cloud(image_stream, input_filename, mime):
 
     Args:
         image_stream: a BufferedIO containing an image
-        input_filename: string filename of the source image
-        mime: MIME content type string
+        filename: string filename of the source image
+        mime_type: MIME content type string
 
     Returns:
         an ID-filename string for the run
     """
-    id_filename = get_id_name(input_filename)
+    id_filename = get_id_name(filename)
 
     # suffix for named temp files so pillow can auto match file encodings
-    _, suffix = os.path.splitext(input_filename)
+    _, suffix = os.path.splitext(filename)
     with NamedTemporaryFile(suffix=suffix) as input_stream:
         orient_image(image_stream, input_stream) # rotate based on EXIF
         input_stream.seek(0) # reset the stream for next use
 
-        save_to_cloud(input_stream, 'uploads/' + id_filename, mime)
+        save_to_cloud(input_stream, 'uploads/' + id_filename, mime_type)
         input_stream.seek(0) # reset the stream for next use
 
         # gs://bucket_name/object_name
@@ -165,10 +169,13 @@ def process_cloud(image_stream, input_filename, mime):
                 save_to_cloud(json_stream, 'gen/' + json_filename, 'application/json')
 
             with NamedTemporaryFile(suffix=suffix) as output_stream:
-                replace_faces(input_stream, faces, output_stream)
-                output_stream.seek(0) # reset the stream for next use
+                if renderer == 'emoji':
+                    replace_faces(input_stream, faces, output_stream)
+                elif renderer == 'bounding_box':
+                    highlight_faces(input_stream, faces, output_stream)
 
+                output_stream.seek(0) # reset the stream for next use
                 output_filename = get_output_name(id_filename)
-                save_to_cloud(output_stream, 'gen/' + output_filename, mime)
+                save_to_cloud(output_stream, 'gen/' + output_filename, mime_type)
 
     return id_filename
