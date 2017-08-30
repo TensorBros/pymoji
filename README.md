@@ -42,11 +42,11 @@ cd <project-dir>
 - Install versions of Python if necessary
 ```
 pyenv install 2.7.13 # necessary for google cloud sdk
-pyenv install 3.5.3 # necessary for pymoji
+pyenv install 3.6.2 # necessary for pymoji
 ```
 - Create new virtual environment
 ```
-pyenv virtualenv 3.5.3 pymoji
+pyenv virtualenv 3.6.2 pymoji
 ```
 - Install dependencies
 ```
@@ -71,7 +71,7 @@ cd <project-dir>
   - [eslint extension](https://packagecontrol.io/packages/SublimeLinter-contrib-eslint)
   - IMPORTANT: because reasons, you must also do some global setup:
   ```
-  pyenv global 3.5.3
+  pyenv global 3.6.2
   cd ~ # go somewhere that falls through to global environment
   pip install pylint pylint-flask
   ```
