@@ -8,7 +8,7 @@ from tempfile import TemporaryFile
 
 from PIL import Image
 
-from pymoji import USE_BIG_GUNS
+from pymoji import FACE_PAD, USE_BIG_GUNS
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
@@ -68,7 +68,7 @@ JOY_CODES = [
 # "1f644" # face with rolling eyes
 
 
-def compute_emoji_box(image, face):
+def compute_emoji_box(image, face, face_pad=FACE_PAD):
     """Computes a 4-tuple defining the left, upper, right, and lower pixel
     coordinate for the emoji bounding box based on the given image and face
     annotation metadata. Remember that the upper-left corner is the origin!
@@ -76,6 +76,7 @@ def compute_emoji_box(image, face):
     Args:
         image: a PIL.Image
         face: a face annotation object from the Google Vision API.
+        face_pad: percentage to enlarge emoji beyond face bounding box
 
     Returns:
         a 4-tuple defining the left, upper, right, and lower pixel coordinate
@@ -90,12 +91,12 @@ def compute_emoji_box(image, face):
     face_bottom = face_bottom_right.y
 
     # compute height and width (top-left corner is origin)
-    face_height = face_top - face_bottom
+    face_height = face_bottom - face_top
     face_width = face_right - face_left
 
     # compute extra padding to approximate head-size
-    width_pad = face_width * 0.1
-    height_pad = face_height * 0.1
+    width_pad = face_width * face_pad
+    height_pad = face_height * face_pad
 
     # original image bounding box
     (image_left, image_top, image_right, image_bottom) = image.getbbox()
