@@ -11,11 +11,13 @@ import exifread
 from google.cloud import storage
 from PIL import Image
 import requests
+from requests.exceptions import Timeout
 from werkzeug.utils import secure_filename
 
 from pymoji import PROJECT_ID
 from pymoji.models import AnnotationsSchema
-from pymoji.constants import ALLOWED_EXTENSIONS
+from pymoji.constants import (ALLOWED_EXTENSIONS, PYMOGI_WEBHOOK_USERNAME,
+    PYMOGI_WEBHOOK_ICON, PYMOGI_WEBHOOK_URL)
 
 
 def shell(cmd, fail_on_error=True):
@@ -79,28 +81,33 @@ def save_to_cloud(data_stream, filename, content_type):
     return blob.public_url
 
 def report_upload_to_slack(id_filename):
-    """Webhook to let Slack know someone's uploaded to our google cloud
-    If this hook fails, it does not block.
+    """Webhook to let Slack know someone has uploaded to our google cloud.
+    If this hook fails it times out after 0.5 seconds.
 
     Args:
         id_filename: the link-about filename we've created to store and reference this upload
-    """
-    status = 'Webhook to slack failed!'
-    try:
-        url = 'https://hooks.slack.com/services/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'
-        message_1 = ("At %s, someone uploaded this:" % timestamp_for_logs())
-        message_2 = ("\n<http://tensorbros.com/emojivision/%s|%s>" % (id_filename, id_filename))
-        payload = {
-          "text": message_1 + message_2,
-          "username": "pymoji_webhook",
-          "icon_emoji": ":pymoji_bot:"
-          }
-        headers = {'content-type': 'application/json'}
 
-        response = requests.post(url, json=payload, headers=headers)
+    Returns:
+        an integer status code
+    """
+    url = PYMOGI_WEBHOOK_URL
+    msg_raw = "At {time}, someone uploaded:\n<http://tensorbros.com/emojivision/{file}|{file}>"
+    msg = msg_raw.format(time=timestamp_for_logs(), file=id_filename)
+    payload = {
+      "text": msg,
+      "username": PYMOGI_WEBHOOK_USERNAME,
+      "icon_emoji": PYMOGI_WEBHOOK_ICON
+      }
+    headers = {'content-type': 'application/json'}
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=0.5)
         status = response.status_code
-    finally:
-        return status #pylint: disable=lost-exception
+    except Timeout:
+        # Request Timeout https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.9
+        status = 408
+
+    return status
 
 def write_json(annotation_data, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
