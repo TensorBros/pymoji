@@ -6,9 +6,10 @@ https://docs.python.org/3/library/io.html
 from io import BytesIO
 import os
 import time
+import logging
 
 import exifread
-from google.cloud import storage
+from google.cloud import storage, error_reporting
 from PIL import Image
 import requests
 from requests.exceptions import Timeout
@@ -101,9 +102,14 @@ def report_upload_to_slack(id_filename):
     headers = {'content-type': 'application/json'}
 
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=0.5)
+        response = requests.post(url, json=payload, headers=headers, timeout=0.0000005)
         status = response.status_code
     except Timeout:
+        # log the error to google's stackdriver TODO: abstract this
+        error_client = error_reporting.Client(project=PROJECT_ID)
+        error_client.report_exception()
+        logging.error('A timeout occurred during an external request to Slack.')
+
         # Request Timeout https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.9
         status = 408
 
