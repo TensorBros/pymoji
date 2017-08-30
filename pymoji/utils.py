@@ -102,7 +102,7 @@ def report_upload_to_slack(id_filename):
     headers = {'content-type': 'application/json'}
 
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=0.0000005)
+        response = requests.post(url, json=payload, headers=headers, timeout=0.5)
         status = response.status_code
     except Timeout:
         # log the error to google's stackdriver TODO: abstract this
