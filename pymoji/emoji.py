@@ -4,11 +4,14 @@ http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
 https://www.emojione.com/emoji/v3
 http://unicode.org/emoji/charts/full-emoji-list.html
 """
+from tempfile import TemporaryFile
+
 from PIL import Image
 
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
+from pymoji.vision import detect_labels
 
 
 # dictionary object to use as in-memory cache of emoji images
@@ -116,6 +119,10 @@ def render_emoji(image, face):
         image: a PIL.Image
         face: a face annotation object from the Google Vision API.
     """
+    top_left = face.bounding_poly.vertices[0]
+    bottom_right = face.bounding_poly.vertices[2]
+    width = (bottom_right.x - top_left.x)
+    height = (bottom_right.y - top_left.y)
     emoji_code = DEFAULT_CODE
 
     # check likelihood scores in roughly inverse-frequency order
@@ -130,12 +137,40 @@ def render_emoji(image, face):
         emoji_code = "1f920" # cowboy hat face
     elif face.joy_likelihood > VERY_UNLIKELY:
         emoji_code = get_code(face.joy_likelihood, JOY_CODES)
+    else:
+        # BRING OUT THE BIG GUNS - analyze labels on individual face
+
+        # compute padding and face crop box
+        width_pad = width * 0.1
+        height_pad = height * 0.1
+        # use max and min to limit padding based on outer image
+        image_box = image.getbbox()
+        face_box = (
+            max(image_box[0], top_left.x - width_pad),
+            max(image_box[1], top_left.y - height_pad),
+            min(image_box[2], bottom_right.x + width_pad),
+            min(image_box[3], bottom_right.y + height_pad)
+        )
+
+        # crop face + save into temp file
+        face_image = image.crop(face_box)
+        with TemporaryFile() as face_stream:
+            face_image.save(face_stream, format='JPEG')
+            face_stream.seek(0)
+
+            # submit face image for labels
+            labels = detect_labels(input_stream=face_stream)
+
+            # greedily convert first interesting label into emoji
+            for label in labels:
+                if label.description == "sunglasses": # at night so I can so I caaaaan
+                    emoji_code = "1f60e" # smiling face with sunglasses
+                    continue
+                elif label.description == "glasses":
+                    emoji_code = "1f913" # nerd face
+                    continue
 
     # scale and render emoji over bounding box
-    top_left = face.bounding_poly.vertices[0]
-    bottom_right = face.bounding_poly.vertices[2]
-    width = (bottom_right.x - top_left.x)
-    height = (bottom_right.y - top_left.y)
     emoji = get_emoji(emoji_code, width, height)
     image.paste(emoji, (top_left.x, top_left.y), emoji)
 
