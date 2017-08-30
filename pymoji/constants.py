@@ -28,6 +28,6 @@ EMOJI_CDN_PATH = 'https://cdn.jsdelivr.net/emojione/assets/3.1/png/128/'
 CLOUD_ROOT = 'http://storage.googleapis.com/'
 
 # Slackhook info
-PYMOGI_WEBHOOK_USERNAME = 'pymoji_webhook'
-PYMOGI_WEBHOOK_ICON = ':pymoji_bot:'
-PYMOGI_WEBHOOK_URL = 'https://hooks.slack.com/services/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'
+PYMOJI_WEBHOOK_USERNAME = 'pymoji_webhook'
+PYMOJI_WEBHOOK_ICON = ':pymoji_bot:'
+PYMOJI_WEBHOOK_URL = 'https://hooks.slack.com/services/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'

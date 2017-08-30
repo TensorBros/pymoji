@@ -17,8 +17,8 @@ from werkzeug.utils import secure_filename
 
 from pymoji import PROJECT_ID
 from pymoji.models import AnnotationsSchema
-from pymoji.constants import (ALLOWED_EXTENSIONS, PYMOGI_WEBHOOK_USERNAME,
-    PYMOGI_WEBHOOK_ICON, PYMOGI_WEBHOOK_URL)
+from pymoji.constants import (ALLOWED_EXTENSIONS, PYMOJI_WEBHOOK_USERNAME,
+    PYMOJI_WEBHOOK_ICON, PYMOJI_WEBHOOK_URL)
 
 
 def shell(cmd, fail_on_error=True):
@@ -91,13 +91,13 @@ def report_upload_to_slack(id_filename):
     Returns:
         an integer status code
     """
-    url = PYMOGI_WEBHOOK_URL
+    url = PYMOJI_WEBHOOK_URL
     msg_raw = "At {time}, someone uploaded:\n<http://tensorbros.com/emojivision/{file}|{file}>"
     msg = msg_raw.format(time=timestamp_for_logs(), file=id_filename)
     payload = {
       "text": msg,
-      "username": PYMOGI_WEBHOOK_USERNAME,
-      "icon_emoji": PYMOGI_WEBHOOK_ICON
+      "username": PYMOJI_WEBHOOK_USERNAME,
+      "icon_emoji": PYMOJI_WEBHOOK_ICON
       }
     headers = {'content-type': 'application/json'}
 
