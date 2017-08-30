@@ -116,9 +116,9 @@ def index():
             else:
                 id_filename = process_cloud(image, image.filename, image.content_type)
 
-            # Report to slack
-            print('Firing webhook to slack#robot_parade about', id_filename)
-            print('Status of webhook: %s' % report_upload_to_slack(id_filename))
+            # Report the upload to slack, non-blocking
+            webhook_status = report_upload_to_slack(id_filename)
+            print('Status of webhook: %s' % webhook_status)
 
             return redirect(url_for('emojivision', id_filename=id_filename))
 

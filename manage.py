@@ -56,7 +56,7 @@ def test():
 
 
 @MANAGER.command
-def pip():
+def install():
     """Runs all project tests!"""
     shell("pip install -r requirements.txt")
 
