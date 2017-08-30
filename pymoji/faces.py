@@ -2,61 +2,12 @@
 import os
 from tempfile import NamedTemporaryFile
 
-from google.cloud import vision
-from google.cloud.vision import types
-
-from pymoji import PROJECT_ID, MAX_RESULTS
+from pymoji import PROJECT_ID
 from pymoji.constants import OUTPUT_DIR, UPLOADS_DIR
 from pymoji.emoji import replace_faces
 from pymoji.utils import allowed_file, get_id_name, get_json_name, get_output_name, \
     orient_image, save_to_cloud, write_json
-
-
-def detect_faces(input_stream=None, input_uri=None):
-    """Uses the Vision API to detect faces in an input image. Pass the input
-    image as either a BufferedIO stream (takes precedence) or a Google Cloud
-    Storage URI.
-
-    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/index.html#annotate-an-image
-    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.Image
-    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.ImageSource
-    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.AnnotateImageRequest
-    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.Feature
-    https://googlecloudplatform.github.io/google-cloud-python/latest/vision/gapic/v1/types.html#google.cloud.vision_v1.types.AnnotateImageResponse
-
-    Args:
-        input_stream: a BufferedIO stream containing an image with faces.
-        input_uri: an image uri for either Google Cloud storage
-            e.g. 'gs://bucket_name/path/to/image.jpg'
-            or public HTTP/HTTP url
-            e.g. 'http://cdn/path/to/image.jpg'
-
-    Returns:
-        an array of Face annotation objects found in the input image.
-    """
-    print('Detecting faces...')
-    client = vision.ImageAnnotatorClient()
-
-    # convert input image to Google Cloud Image
-    content = None
-    source = None
-    if input_stream:
-        content = input_stream.read()
-    elif input_uri:
-        source = types.ImageSource(image_uri=input_uri) # pylint: disable=no-member
-    image = types.Image(content=content, source=source) # pylint: disable=no-member
-
-    features = [{
-        'type': vision.enums.Feature.Type.FACE_DETECTION,
-        'max_results': MAX_RESULTS
-    }]
-    faces = client.annotate_image({
-        'image': image,
-        'features': features
-        }).face_annotations # pylint: disable=no-member
-
-    print('...{} faces found.'.format(len(faces)))
-    return faces
+from pymoji.vision import detect_faces
 
 
 def process_path(input_path):
