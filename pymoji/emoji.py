@@ -221,6 +221,23 @@ def render_emoji(image, face):
     """
     emoji_box = compute_emoji_box(image, face)
     emoji_code = compute_emoji_code(image, face, emoji_box)
+
+    """
+    Hat emoji yellow face is smaller than normal yellow face and should be
+    113% wider and 112% taller to get the same ammount of yellow face.
+    """
+    if emoji_code == "1f920":
+        # calc scaled up size
+        hat_width = int(width * 1.13)
+        hat_height = int(height * 1.12)
+        # calc new top left corner, transformed from center bottom
+        top_left.y -= hat_height - height # entirety of the new tallness
+        top_left.x -= int((hat_width - width)/2) # half of the new fatness
+
+        # set new sizes
+        width = hat_width
+        height = hat_height
+
     emoji = get_emoji_image(emoji_code, emoji_box)
     image.paste(emoji, emoji_box, emoji)
 
