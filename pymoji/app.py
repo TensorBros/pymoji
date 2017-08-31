@@ -121,9 +121,9 @@ def index():
                 run_args['mime_type'] = image.content_type
                 id_filename = process_cloud(**run_args)
 
-            # Report the upload to slack, non-blocking
-            webhook_status = report_upload_to_slack(id_filename)
-            print('Status of webhook: %s' % webhook_status)
+                # Report the upload to slack, non-blocking
+                webhook_status = report_upload_to_slack(id_filename)
+                print('Status of webhook: %s' % webhook_status)
 
             return redirect(url_for('emojivision', id_filename=id_filename))
 
