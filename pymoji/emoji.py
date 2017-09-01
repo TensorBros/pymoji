@@ -222,17 +222,23 @@ def render_emoji(image, face):
     emoji_box = compute_emoji_box(image, face)
     emoji_code = compute_emoji_code(image, face, emoji_box)
 
-    #bring back some rectangularness as a function of height
+    # post-process emoji dimensions
+    # TODO maybe extract this as a function
+    (left, top, right, bottom) = emoji_box
+    width = right - left
+    height = bottom - top
 
-    emoji_size = height # for now, this is pretty much always largest
+    # for now, always use square emoji
+    # TODO bring back some rectangularness as a function of height
+    emoji_size = max(height, width)
 
     midpoint_between_eyes = face.landmarks[6].position
     nose_tip = face.landmarks[7].position
 
     center_of_emoji = average_points(midpoint_between_eyes, nose_tip)
-
-    top_left.x = int(center_of_emoji['x'] - emoji_size/2)
-    top_left.y = int(center_of_emoji['y'] - emoji_size/2)
+    # scale and render emoji over bounding box
+    left = int(center_of_emoji['x'] - emoji_size/2)
+    top = int(center_of_emoji['y'] - emoji_size/2)
 
     """
     Hat emoji yellow face is smaller than normal yellow face and should be
@@ -242,11 +248,16 @@ def render_emoji(image, face):
         # calc scaled up size
         hat_avg = emoji_size * 1.16
         # calc new top left corner, transformed from center bottom
-        top_left.y -= int(hat_avg - emoji_size) # entirety of the new tallness
-        top_left.x -= int((hat_avg - emoji_size)/2) # half of the new fatness
+        top -= int(hat_avg - emoji_size) # entirety of the new tallness
+        left -= int((hat_avg - emoji_size)/2) # half of the new fatness
 
         # set new sizes
         emoji_size = int(hat_avg)
+
+    right = left + emoji_size
+    bottom = top + emoji_size
+    emoji_box = (left, top, right, bottom)
+    # done post-processing
 
     emoji = get_emoji_image(emoji_code, emoji_box)
     image.paste(emoji, emoji_box, emoji)
