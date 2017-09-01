@@ -20,6 +20,15 @@ from pymoji.models import AnnotationsSchema
 from pymoji.constants import (ALLOWED_EXTENSIONS, PYMOJI_WEBHOOK_USERNAME,
     PYMOJI_WEBHOOK_ICON, PYMOJI_WEBHOOK_URL)
 
+def average_points(a, b):
+  '''Takes a point object and returns the averaged location
+
+  Args:
+    point: a dictionary of position with an x and y coordinate
+  '''
+  avg = { 'x' : (a.x + b.x)/2, 'y': (a.y + b.y)/2}
+
+  return avg
 
 def shell(cmd, fail_on_error=True):
     """Convenience wrapper function."""
