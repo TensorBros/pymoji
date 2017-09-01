@@ -32,5 +32,7 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB upload limit
 # Google App Engine
 PROJECT_ID = 'pymoji-176318'
 
-# Face detection params
+# Emoji engine params
+FACE_PAD = 0.05 # percentage to enlarge emoji beyond face bounding box
 MAX_RESULTS = 20
+USE_BIG_GUNS = True # whether or not to fallback on label analysis (slow)

@@ -4,11 +4,15 @@ http://pillow.readthedocs.io/en/4.2.x/reference/Image.html
 https://www.emojione.com/emoji/v3
 http://unicode.org/emoji/charts/full-emoji-list.html
 """
+from tempfile import TemporaryFile
+
 from PIL import Image, ImageDraw
 
+from pymoji import FACE_PAD, USE_BIG_GUNS
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import VERY_UNLIKELY, UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
+from pymoji.vision import detect_labels, to_vision_image
 
 
 # dictionary object to use as in-memory cache of emoji images
@@ -64,13 +68,56 @@ JOY_CODES = [
 # "1f644" # face with rolling eyes
 
 
-def get_emoji(code, width, height):
-    """Returns the emoji for the given emoji code as a RGBA PIL.Image scaled
-    to the given width and height. Maintains a cache of original templates
-    (CDN source files are 128x128 PNGs).
+def compute_emoji_box(image, face, face_pad=FACE_PAD):
+    """Computes a 4-tuple defining the left, upper, right, and lower pixel
+    coordinate for the emoji bounding box based on the given image and face
+    annotation metadata. Remember that the upper-left corner is the origin!
+
+    Args:
+        image: a PIL.Image
+        face: a face annotation object from the Google Vision API.
+        face_pad: percentage to enlarge emoji beyond face bounding box
+
+    Returns:
+        a 4-tuple defining the left, upper, right, and lower pixel coordinate
+            e.g. (0, 0, 128, 128)
+    """
+    face_top_left = face.bounding_poly.vertices[0]
+    face_left = face_top_left.x
+    face_top = face_top_left.y
+
+    face_bottom_right = face.bounding_poly.vertices[2]
+    face_right = face_bottom_right.x
+    face_bottom = face_bottom_right.y
+
+    # compute height and width (top-left corner is origin)
+    face_height = face_bottom - face_top
+    face_width = face_right - face_left
+
+    # compute extra padding to approximate head-size
+    width_pad = face_width * face_pad
+    height_pad = face_height * face_pad
+
+    # original image bounding box
+    (image_left, image_top, image_right, image_bottom) = image.getbbox()
+
+    # add padding, use max and min to limit based on outer image
+    left = max(image_left, int(face_left - width_pad))
+    top = max(image_top, int(face_top - height_pad))
+    right = min(image_right, int(face_right + width_pad))
+    bottom = min(image_bottom, int(face_bottom + height_pad))
+
+    return (left, top, right, bottom)
+
+
+def get_emoji_image(code, box):
+    """Creates an emoji RGBA PIL.Image for the given code, scaled to the
+    given bounding box. Maintains a cache of original templates (CDN source
+    files are 128x128 PNGs).
 
     Args:
         code: a string containing the code for the desired emoji.
+        box: a 4-tuple defining the emoji bounding box (see compute_emoji_box)
 
     Returns:
         a scaled RGBA PIL.Image of the emoji.
@@ -80,6 +127,13 @@ def get_emoji(code, width, height):
         emoji_url = EMOJI_CDN_PATH + code + '.png'
         emoji = download_image(emoji_url).convert('RGBA')
         EMOJI[code] = emoji
+
+    # compute height and width (top-left corner is origin)
+    (left, top, right, bottom) = box
+    height = bottom - top
+    width = right - left
+
+    # get image from cache and resize
     return EMOJI[code].resize((width, height), resample=0)
 
 
@@ -106,6 +160,55 @@ def get_code(likelihood, code_list):
     return DEFAULT_CODE
 
 
+def compute_emoji_code(image, face, box, use_big_guns=USE_BIG_GUNS):
+    """Computes the 'best' emoji string code for the given face in the given
+    image.
+
+    Args:
+        image: a PIL.Image
+        face: a face annotation object from the Google Vision API.
+        box: a 4-tuple defining the emoji bounding box (see compute_emoji_box)
+        use_big_guns: whether or not to fallback on label analysis (slow)
+
+    Returns:
+        an emoji string code
+    """
+
+    # check likelihood scores in roughly inverse-frequency order
+    # i.e. ensure that rare sorrow emoji outrank common joy emoji
+    if face.sorrow_likelihood > VERY_UNLIKELY:
+        return get_code(face.sorrow_likelihood, SORROW_CODES)
+    elif face.anger_likelihood > VERY_UNLIKELY:
+        return get_code(face.anger_likelihood, ANGER_CODES)
+    elif face.surprise_likelihood > VERY_UNLIKELY:
+        return get_code(face.surprise_likelihood, SURPRISE_CODES)
+    elif face.headwear_likelihood > POSSIBLE:
+        return "1f920" # cowboy hat face
+    elif face.joy_likelihood > VERY_UNLIKELY:
+        return get_code(face.joy_likelihood, JOY_CODES)
+    elif use_big_guns:
+        # BRING OUT THE BIG GUNS - analyze labels on individual head
+
+        # crop head + save into temp file
+        head_image = image.crop(box)
+        with TemporaryFile() as head_stream:
+            head_image.save(head_stream, format='JPEG')
+            head_stream.seek(0)
+
+            # submit head image for labels
+            gv_head_image = to_vision_image(input_stream=head_stream)
+            labels = detect_labels(gv_head_image)
+
+            # greedily convert first interesting label into emoji
+            for label in labels:
+                if label.description == "sunglasses": # at night so I can so I caaaaan
+                    return "1f60e" # smiling face with sunglasses
+                elif label.description == "glasses":
+                    return "1f913" # nerd face
+
+    return DEFAULT_CODE
+
+
 def render_emoji(image, face):
     """Renders an emoji on top of the given image using the given face
     annotation data.
@@ -116,28 +219,10 @@ def render_emoji(image, face):
         image: a PIL.Image
         face: a face annotation object from the Google Vision API.
     """
-    emoji_code = DEFAULT_CODE
-
-    # check likelihood scores in roughly inverse-frequency order
-    # i.e. ensure that rare sorrow emoji outrank common joy emoji
-    if face.sorrow_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.sorrow_likelihood, SORROW_CODES)
-    elif face.anger_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.anger_likelihood, ANGER_CODES)
-    elif face.surprise_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.surprise_likelihood, SURPRISE_CODES)
-    elif face.headwear_likelihood > POSSIBLE:
-        emoji_code = "1f920" # cowboy hat face
-    elif face.joy_likelihood > VERY_UNLIKELY:
-        emoji_code = get_code(face.joy_likelihood, JOY_CODES)
-
-    # scale and render emoji over bounding box
-    top_left = face.bounding_poly.vertices[0]
-    bottom_right = face.bounding_poly.vertices[2]
-    width = (bottom_right.x - top_left.x)
-    height = (bottom_right.y - top_left.y)
-    emoji = get_emoji(emoji_code, width, height)
-    image.paste(emoji, (top_left.x, top_left.y), emoji)
+    emoji_box = compute_emoji_box(image, face)
+    emoji_code = compute_emoji_code(image, face, emoji_box)
+    emoji = get_emoji_image(emoji_code, emoji_box)
+    image.paste(emoji, emoji_box, emoji)
 
 
 def replace_faces(input_stream, faces, output_stream):
