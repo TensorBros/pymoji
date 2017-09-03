@@ -184,7 +184,7 @@ def get_emoji_box(face, face_pad=FACE_PAD, code=None):
 
     # for now, always use square emoji
     # TODO bring back some rectangularness as a function of height?
-    emoji_size = max(face_height, face_width) * (1 + face_pad)
+    emoji_size = int(max(face_height, face_width) * (1 + face_pad))
 
     # TODO add landmarks to JSON
     midpoint_between_eyes = face.landmarks[6].position
