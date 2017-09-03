@@ -33,6 +33,6 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB upload limit
 PROJECT_ID = 'pymoji-176318'
 
 # Emoji engine params
-FACE_PAD = 0.05 # percentage to enlarge emoji beyond face bounding box
+FACE_PAD = 0.00 # percentage to enlarge emoji
 MAX_RESULTS = 20
 USE_BIG_GUNS = True # whether or not to fallback on label analysis (slow)
