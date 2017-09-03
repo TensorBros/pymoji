@@ -182,14 +182,19 @@ def get_emoji_box(face, face_pad=FACE_PAD, code=None):
     face_height = face_bottom - face_top
     face_width = face_right - face_left
 
+    # find center of emoji
+    face_top_left = face.bounding_poly.vertices[0]
+    face_bottom_right = face.bounding_poly.vertices[2]
+    center_of_emoji = average_points(face_top_left, face_bottom_right)
+
     # for now, always use square emoji
     # TODO bring back some rectangularness as a function of height?
     emoji_size = int(max(face_height, face_width) * (1 + face_pad))
 
-    # TODO add landmarks to JSON
-    midpoint_between_eyes = face.landmarks[6].position
-    nose_tip = face.landmarks[7].position
-    center_of_emoji = average_points(midpoint_between_eyes, nose_tip)
+    # TODO experiment with face landmarks to adjust position
+    # midpoint_between_eyes = face.landmarks[6].position
+    # nose_tip = face.landmarks[7].position
+    # center_of_emoji = average_points(midpoint_between_eyes, nose_tip)
 
     # scale and render emoji over bounding box
     left = int(center_of_emoji['x'] - emoji_size / 2)
