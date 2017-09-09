@@ -48,7 +48,10 @@ def detect_faces(image):
         a list of Face annotation objects found in the input image.
     """
     print('Detecting faces...')
-
+    
+    # This call to Google Vision API (ImageAnnotatorClient) will not work on local 
+    # if you don't have default application credentials. See README.
+    # https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login
     client = ImageAnnotatorClient()
     features = [{
         'type': enums.Feature.Type.FACE_DETECTION,
