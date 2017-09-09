@@ -85,6 +85,10 @@ def report_upload_to_slack(id_filename):
     """Webhook to let Slack know someone has uploaded to our google cloud.
     If this hook fails it times out after 0.5 seconds.
 
+    Example message payload:
+        At <!date^1504903239^{date_short} {time}|Friday, 08 Sep 2017  1:40 PM>, someone uploaded:
+        <http://tensorbros.com/emojivision/1504903228457_IMG_2593.JPG|1504903228457_IMG_2593.JPG>
+
     Args:
         id_filename: the link-about filename we've created to store and reference this upload
 
@@ -93,7 +97,20 @@ def report_upload_to_slack(id_filename):
     """
     url = PYMOJI_WEBHOOK_URL
     msg_raw = "At {time}, someone uploaded:\n<http://tensorbros.com/emojivision/{file}|{file}>"
-    msg = msg_raw.format(time=timestamp_for_logs(), file=id_filename)
+
+    # format unix time into slack client template
+    # https://api.slack.com/docs/message-formatting#formatting_dates
+    time_raw = "<!date^{unix_time}^{slack_template}|{fallback}>"
+    unix_time = int(round(time.time()))
+    # these curly braces are formatted by slack client, not python!
+    slack_template = "{date_short} {time}"
+    fallback = timestamp_for_logs() # use prior approach as fallback
+    time_msg = time_raw.format(unix_time=unix_time, slack_template=slack_template,
+        fallback=fallback)
+
+    msg = msg_raw.format(time=time_msg, file=id_filename)
+    print(msg)
+
     payload = {
       "text": msg,
       "username": PYMOJI_WEBHOOK_USERNAME,
