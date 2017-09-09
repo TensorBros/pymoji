@@ -56,6 +56,20 @@ pip install --upgrade pip setuptools
 pip install -r requirements.txt
 ```
 
+#### ☁ Google Vision Dependency
+- If you're running locally, Google Vision API calls require the user to have [
+Google Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login).
+
+If you haven't yet, you'll need to install google-cloud-sdk.
+You may also need to manually and temporarily change your global python version to `pyenv global 2.7.13`. Make sure `.python-version` is correctly set to `pymoji`.
+
+```
+# This will open a browser for you to Oauth
+gcloud auth application-default login
+```
+Note that this is basically [step #2 in this list](https://developers.google.com/identity/protocols/application-default-credentials); automated robots need to use step #1.
+
+
 ### 🎣 Git Hooks
 
 - Auomatically run linters before pushing:
