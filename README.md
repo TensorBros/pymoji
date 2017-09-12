@@ -97,16 +97,20 @@ cd <project-dir>
 - Start by cloning a new developer config
 ```
 cd <project-dir>
-cp config.py instance/config.py
+cp config.py instance/local_config.py
 ```
 
-- Edit `instance/config.py` as needed. Be sure to comment out `SERVER_NAME`!
+- Edit `instance/local_config.py` as needed. Be sure to set `SERVER_NAME=None`!
 ```python
 # probably good to at least set these:
 DEBUG = True
-TESTING = True
-# IMPORTANT: must comment this out!!! ("localhost" is unsupported)
-# SERVER_NAME = 'tensorbros.com'
+TESTING = True # also controls local VS google cloud services
+# IMPORTANT: when running local dev environment, must override and set to None
+SERVER_NAME = None
+
+# optional overrides
+MAX_RESULTS = 5
+# ...
 ```
 
 - Make sure everything works
