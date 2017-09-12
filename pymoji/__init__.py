@@ -3,12 +3,17 @@ import logging
 
 from flask import Flask
 import google.cloud.logging
+import config
 
 
-APP = Flask(__name__, instance_relative_config=True)
-APP.config.from_pyfile('config.py')
-# would then override with settings found in file at env var
-#APP.config.from_envvar('YOURAPPLICATION_SETTINGS')
+# initialize Flask app singleton
+APP = Flask(__name__)
+
+# load default configuration settings
+APP.config.from_object(config)
+
+# override with custom instance settings if available
+APP.config.from_envvar('PYMOJI_SETTINGS', silent=True)
 
 # convenience references for other modules to import
 FACE_PAD = APP.config.get('FACE_PAD', 0.05)
