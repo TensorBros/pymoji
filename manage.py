@@ -51,7 +51,7 @@ def rundir(directory_path):
 @MANAGER.command
 def test():
     """Runs all project tests!"""
-    shell("pytest")
+    shell("pytest --doctest-modules")
     #shell("cd static/js && npm test")
 
 
