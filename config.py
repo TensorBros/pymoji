@@ -1,13 +1,15 @@
 """Default instance application configuation settings.
 
 To set up a local environment, start by copying this file:
-  $ cp config.py instance/config.py
+  $ cp config.py instance/local_config.py
 
-Then edit instance/config.py, e.g.
+Then edit instance/local_config.py, e.g.
   DEBUG = True
   TESTING = True
-  # IMPORTANT: must comment this out!!! ("localhost" is unsupported)
-  # SERVER_NAME = 'tensorbros.com'
+  SERVER_NAME = None
+
+Setting values in local_config.py will override the defaults found here. Any
+unspecified settings in local_config.py will simply fallback on the defaults.
 """
 
 # Webserver Settings
@@ -16,7 +18,8 @@ Then edit instance/config.py, e.g.
 # Important for Local Dev
 DEBUG = False
 TESTING = False # also controls local VS google cloud services
-# IMPORTANT: must comment this out!!! ("localhost" is unsupported)
+# IMPORTANT: when running local dev environment, must override and set to None
+# SERVER_NAME = None
 SERVER_NAME = 'tensorbros.com'
 
 # Other misc Flask settings
