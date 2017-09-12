@@ -3,6 +3,7 @@ import logging
 
 from flask import Flask
 import google.cloud.logging
+
 import config
 
 
@@ -11,6 +12,9 @@ APP = Flask(__name__)
 
 # load default configuration settings
 APP.config.from_object(config)
+
+# Note: avoid instance_relative_config if possible, it breaks non-Flask packages
+# NOT RECOMMENDED http://flask.pocoo.org/docs/0.12/config/#instance-folders
 
 # override with custom instance settings if available
 APP.config.from_envvar('PYMOJI_SETTINGS', silent=True)
