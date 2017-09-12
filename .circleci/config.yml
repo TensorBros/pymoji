@@ -68,7 +68,7 @@ jobs:
           name: run tests
           command: |
             source venv/bin/activate
-            python -m pytest --junitxml=tmp/test-reports.xml
+            python -m pytest --doctest-modules --junitxml=tmp/test-reports.xml
       - store_test_results:
           path: tmp
       - store_artifacts:
