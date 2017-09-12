@@ -36,6 +36,14 @@ def allowed_file(filename):
 
     http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
 
+    Examples:
+        >>> allowed_file('input-face.jpeg')
+        True
+        >>> allowed_file('__stoo-pid.file-name.PNG')
+        True
+        >>> allowed_file('bar.mov')
+        False
+
     Args:
         filename: a string.
 
@@ -80,6 +88,7 @@ def save_to_cloud(data_stream, filename, content_type):
     print('...upload completed.')
     # The public URL can be used to directly access the uploaded file via HTTP.
     return blob.public_url
+
 
 def report_upload_to_slack(id_filename):
     """Webhook to let Slack know someone has uploaded to our google cloud.
@@ -131,6 +140,7 @@ def report_upload_to_slack(id_filename):
         status = 408
 
     return status
+
 
 def write_json(annotation_data, json_stream):
     """Serializes the given metadata object with marshmallow and writes the
@@ -244,13 +254,21 @@ def get_id_name(filename):
     timestamp_in_seconds = int(round(time.time() * 1000))
     return str(timestamp_in_seconds) + '_' + secure_filename(filename)
 
+
 def timestamp_for_logs():
     """Returns consistent timestamp for the app logs
     """
     return time.strftime('%A, %d %b %Y %l:%M %p')
 
+
 def get_json_name(input_filename):
     """Makes a faces metadata filename based on the given input filename.
+
+    Examples:
+        >>> get_json_name('input-face.jpg')
+        'input-face-meta.json'
+        >>> get_json_name('__stoo-pid.file-name.PNG')
+        '__stoo-pid.file-name-meta.json'
 
     Args:
         input_filename: a filname string, e.g. "face-input.jpg"
@@ -264,6 +282,12 @@ def get_json_name(input_filename):
 
 def get_output_name(input_filename):
     """Makes an output filename based on the given input filename.
+
+    Examples:
+        >>> get_output_name('input-face.jpg')
+        'input-face-output.jpg'
+        >>> get_output_name('__stoo-pid.file-name.PNG')
+        '__stoo-pid.file-name-output.PNG'
 
     Args:
         input_filename: a filname string, e.g. "face-input.jpg"
