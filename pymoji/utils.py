@@ -242,16 +242,27 @@ def orient_image(input_stream, output_stream):
     image.close()
 
 
-def get_id_name(filename):
+def get_id_name(filename, testing_timestamp=None):
     """Makes a safe, unique-ish filename based on the given input filename.
+    Optional testing_timestamp to get deterministic output.
+
+    Examples:
+        >>> get_id_name('hobbits-to-isengard.jpg', testing_timestamp=1505405400.173515)
+        '1505405400174_hobbits-to-isengard.jpg'
 
     Args:
         input_filename: a filname string, e.g. "face-input.jpg"
 
     Returns:
-        a unique-ish filename string, e.g. "1503280514351_face-input.jpg"
+        a unique-ish filename string based on timestamp, e.g. "1503280514351_face-input.jpg"
     """
-    timestamp_in_seconds = int(round(time.time() * 1000))
+
+    if testing_timestamp:
+        timestamp = testing_timestamp
+    else:
+        timestamp = time.time()
+
+    timestamp_in_seconds = int(round(timestamp * 1000))
     return str(timestamp_in_seconds) + '_' + secure_filename(filename)
 
 
