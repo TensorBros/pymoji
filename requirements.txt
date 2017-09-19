@@ -21,3 +21,10 @@ google-cloud-vision==0.27.0
 # image processing
 Pillow==4.2.1
 exifread==2.1.2
+
+# math! tensors! science!
+h5py==2.7.1 # processing large datasets
+matplotlib==2.0.2 # pretty pictures
+numpy==1.13.1
+scipy==1.0.0b1
+tensorflow==1.3.0 # on the DL
