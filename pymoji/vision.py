@@ -33,8 +33,8 @@ def to_vision_image(input_stream=None, input_uri=None):
     if input_stream:
         content = input_stream.read()
     elif input_uri:
-        source = types.ImageSource(image_uri=input_uri) # pylint: disable=no-member
-    return types.Image(content=content, source=source) # pylint: disable=no-member
+        source = types.ImageSource(image_uri=input_uri)
+    return types.Image(content=content, source=source)
 
 
 def detect_faces(image):
@@ -60,7 +60,7 @@ def detect_faces(image):
     faces = client.annotate_image({
         'image': image,
         'features': features
-        }).face_annotations # pylint: disable=no-member
+        }).face_annotations
 
     print('...{} faces found.'.format(len(faces)))
     return faces
@@ -86,7 +86,7 @@ def detect_labels(image):
     labels = client.annotate_image({
         'image': image,
         'features': features
-        }).label_annotations # pylint: disable=no-member
+        }).label_annotations
 
     print('...{} labels found.'.format(len(labels)))
     return labels
