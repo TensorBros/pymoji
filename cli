@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ -f "instance/config.py" ]; then
+if [ -f "instance/local_config.py" ]; then
     export PYMOJI_SETTINGS=$(realpath "instance/local_config.py")
 fi
 python manage.py "$@"
