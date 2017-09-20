@@ -266,7 +266,6 @@ def get_emoji_code(image, face, use_gva_labels=USE_GVA_LABELS):
             # Check labels (len <= MAX_RESULTS) and add them to candidates.
             # Control which label wins through HUMOR_RANK.
             for label in labels:
-                print(label.description)
                 if label.description == "tongue":
                     candidates.add("1f61b") # tongue sticking out
                 elif label.description == "sunglasses":
