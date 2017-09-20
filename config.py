@@ -38,4 +38,4 @@ PROJECT_ID = 'pymoji-176318'
 # Emoji engine params
 FACE_PAD = 0.05 # percentage to enlarge emoji beyond face bounding box
 MAX_RESULTS = 20
-USE_BIG_GUNS = True # whether or not to fallback on label analysis (slow)
+USE_GVA_LABELS = True # whether or not to fallback on label analysis (slow)
