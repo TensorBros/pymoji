@@ -8,7 +8,7 @@ from tempfile import TemporaryFile
 
 from PIL import Image, ImageDraw
 
-from pymoji import FACE_PAD, USE_BIG_GUNS
+from pymoji import FACE_PAD, USE_GVA_LABELS
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
@@ -226,14 +226,14 @@ def get_emoji_image(code, box):
     return EMOJI[code].resize((width, height), resample=0)
 
 
-def get_emoji_code(image, face, use_big_guns=USE_BIG_GUNS):
+def get_emoji_code(image, face, use_gva_labels=USE_GVA_LABELS):
     """Computes the 'best' emoji string code for the given face in the given
     image.
 
     Args:
         image: the original PIL.Image containing the face
         face: a face annotation object from the Google Vision API.
-        use_big_guns: whether or not to fallback on label analysis (slow)
+        use_gva_labels: fallback on Google Vision API label analysis (slow)
 
     Returns:
         an emoji string code
@@ -248,8 +248,9 @@ def get_emoji_code(image, face, use_big_guns=USE_BIG_GUNS):
     if face.headwear_likelihood > POSSIBLE:
         candidates.add("1f920") # cowboy hat face
 
-    if use_big_guns:
-        # BRING OUT THE BIG GUNS - analyze labels on individual head
+    if use_gva_labels:
+        # USE_GVA_LABELS - analyze labels on individual head
+        # (((  AKA USE_BIG_GUNS )))
 
         # crop head + save into temp file
         head_box = get_emoji_box(face)

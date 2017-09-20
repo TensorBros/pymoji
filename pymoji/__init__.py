@@ -22,7 +22,7 @@ APP.config.from_envvar('PYMOJI_SETTINGS', silent=True)
 # convenience references for other modules to import
 FACE_PAD = APP.config.get('FACE_PAD', 0.05)
 MAX_RESULTS = APP.config.get('MAX_RESULTS', 20)
-USE_BIG_GUNS = APP.config.get('USE_BIG_GUNS', False)
+USE_GVA_LABELS = APP.config.get('USE_GVA_LABELS', False)
 PROJECT_ID = APP.config['PROJECT_ID']
 
 # Configure logging
