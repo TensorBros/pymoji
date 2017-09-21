@@ -8,7 +8,7 @@ from tempfile import TemporaryFile
 
 from PIL import Image, ImageDraw
 
-from pymoji import FACE_PAD, USE_BIG_GUNS
+from pymoji import FACE_PAD, USE_GVA_LABELS
 from pymoji.constants import EMOJI_CDN_PATH
 from pymoji.constants import UNLIKELY, POSSIBLE, LIKELY, VERY_LIKELY
 from pymoji.utils import download_image
@@ -66,6 +66,12 @@ JOY_MAP = {
 
 # earlier in list ~ funnier / rarer
 HUMOR_RANK = [
+    # specialty emoji, based on labeling
+    "1f61b", # face with stuck-out tongue
+    "1f913", # nerd face
+    "1f60e", # smiling face with sunglasses
+    "1f60d", # smiling face with <3 heart eyes
+
     # sorrow likelihood
     "1f622", # crying face
     "1f61e", # disappointed face
@@ -89,10 +95,6 @@ HUMOR_RANK = [
     # headwear likelihood
     "1f920", # cowboy hat face
 
-    # big guns
-    "1f60e", # smiling face with sunglasses
-    "1f913", # nerd face
-
     # joy likelihood - boring
     "1f603", # smiling face with open mouth
     "1f60c", # relieved face
@@ -102,8 +104,6 @@ HUMOR_RANK = [
 
     # currently impossible, but someday...
     "1f615", # confused face
-    "1f61b", # face with stuck-out tongue
-    "1f60d", # smiling face with heart-eyes
     "1f644", # face with rolling eyes
 ]
 
@@ -226,14 +226,14 @@ def get_emoji_image(code, box):
     return EMOJI[code].resize((width, height), resample=0)
 
 
-def get_emoji_code(image, face, use_big_guns=USE_BIG_GUNS):
+def get_emoji_code(image, face, use_gva_labels=USE_GVA_LABELS):
     """Computes the 'best' emoji string code for the given face in the given
     image.
 
     Args:
         image: the original PIL.Image containing the face
         face: a face annotation object from the Google Vision API.
-        use_big_guns: whether or not to fallback on label analysis (slow)
+        use_gva_labels: fallback on Google Vision API label analysis (slow)
 
     Returns:
         an emoji string code
@@ -248,8 +248,9 @@ def get_emoji_code(image, face, use_big_guns=USE_BIG_GUNS):
     if face.headwear_likelihood > POSSIBLE:
         candidates.add("1f920") # cowboy hat face
 
-    if len(candidates) == 1 and use_big_guns:
-        # BRING OUT THE BIG GUNS - analyze labels on individual head
+    if use_gva_labels:
+        # USE_GVA_LABELS - analyze labels on individual head
+        # (((  AKA USE_BIG_GUNS )))
 
         # crop head + save into temp file
         head_box = get_emoji_box(face)
@@ -262,14 +263,21 @@ def get_emoji_code(image, face, use_big_guns=USE_BIG_GUNS):
             gv_head_image = to_vision_image(input_stream=head_stream)
             labels = detect_labels(gv_head_image)
 
-            # greedily convert first interesting label into emoji, then stop
+            # Check labels (len <= MAX_RESULTS) and add them to candidates.
+            # Control which label wins through HUMOR_RANK.
             for label in labels:
-                if label.description == "sunglasses": # at night so I can so I caaaaan
+                if label.description == "tongue":
+                    candidates.add("1f61b") # tongue sticking out
+                elif label.description == "sunglasses":
                     candidates.add("1f60e") # smiling face with sunglasses
-                    break
                 elif label.description == "glasses":
                     candidates.add("1f913") # nerd face
-                    break
+                elif 'vision' in label.description:
+                    candidates.add("1f913") # nerd face also; nerds have vision care
+                elif 'love' in label.description:
+                    candidates.add("1f60d") # add more love love love
+                elif 'kiss' in label.description:
+                    candidates.add("1f60d") # because kissyface
 
     # sort by humor rank and return the funniest
     ranked_candidates = sorted(candidates, key=get_humor_rank)

@@ -40,6 +40,7 @@ def to_vision_image(input_stream=None, input_uri=None):
 def detect_faces(image):
     """Finds faces in the given input image and returns a list of Google Vision
     API Face Annotations.
+    Currently uses MAX_RESULTS to limit how many labels come back.
 
     Args:
         image: a Google Cloud Vision API Image object with faces.
@@ -69,6 +70,7 @@ def detect_faces(image):
 def detect_labels(image):
     """Finds labels in the given input image and returns a list of Google Vision
     API Label Annotations.
+    Currently uses MAX_RESULTS to limit how many labels come back.
 
     Args:
         image: a Google Cloud Vision API Image object with faces.
