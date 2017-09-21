@@ -126,14 +126,16 @@ def extract_heads(image, faces):
         faces: Google Vision API metadata
 
     Returns:
-        an ndarray of awesome
+        a pair of ndarrays X, Y
+            X: features, shape (image size, number of examples)
+            Y: labels, shape (number of classes, number of examples)
     """
     features = []
     labels = []
 
     for face in faces:
         # compute label Y
-        code = get_emoji_code(None, face, use_big_guns=False)
+        code = get_emoji_code(None, face, use_gva_labels=False)
         # https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.where.html
         y = np.where(CLASSES == code, 1, 0).T
         # compute features X

@@ -346,7 +346,17 @@ def highlight_faces(input_stream, faces, output_stream):
 
 
 def extract_head(input_stream, face, code):
-    """Gory decapitation. Use at own risk."""
+    """Copies a head image from the given image using the given face and emoji
+    metadata.
+
+    Args:
+        input_stream: input file-object containing the head to hunt
+        face: Google Vision API metadata object
+        code: emoji code string
+
+    Returns:
+        a PIL.Image with a freshly decapitated head
+    """
     image = Image.open(input_stream)
     head_box = get_emoji_box(face, code=code)
     head_image = image.crop(head_box)
