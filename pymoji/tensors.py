@@ -39,7 +39,7 @@ CLASSES = np.array([
 ], ndmin=2) # shape (1, 16)
 
 HEAD_SIZE = 64 # pixels
-MINI_BATCH_SIZE = 64
+MINI_BATCH_SIZE = 100
 
 # pylint: disable=invalid-name
 
@@ -54,7 +54,7 @@ def head_to_ndarray(input_stream, size=HEAD_SIZE):
 
     Examples:
     >>> from pymoji.constants import DEMO_PATH
-    >>> to_ndarray(DEMO_PATH).shape
+    >>> head_to_ndarray(DEMO_PATH).shape
     (12288, 1)
 
     Args:
@@ -79,15 +79,15 @@ def load_all_heads(directory_path=UPLOADS_DIR):
         directory_path: directory to go head-hunting in
 
     Returns:
-        an ndarray of awesome
+        a pair of ndarrays X, Y
+            X: features, shape (image size, number of examples)
+            Y: labels, shape (number of classes, number of examples)
     """
     features = []
     labels = []
 
     def load_heads(input_path):
-        """Helper for iteratively loading input feature data, processes the image
-        at the given path and appends any new examples to the given dataset.
-        """
+        """Helper for iteratively loading input feature data."""
         try:
             id_filename = os.path.basename(input_path)
             json_filename = get_json_name(id_filename)
