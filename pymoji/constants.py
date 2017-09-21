@@ -8,6 +8,8 @@ STATIC_DIR = os.path.join(PACKAGE_DIR, 'static')
 UPLOADS_DIR = os.path.join(STATIC_DIR, 'uploads')
 DEMO_PATH = os.path.join(UPLOADS_DIR, 'face-input.jpg')
 OUTPUT_DIR = os.path.join(STATIC_DIR, 'gen')
+TEST_DATASET = os.path.join(OUTPUT_DIR, 'test_dataset.h5')
+TRAIN_DATASET = os.path.join(OUTPUT_DIR, 'train_dataset.h5')
 
 # Supported image files (Google Vision and pillow)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
