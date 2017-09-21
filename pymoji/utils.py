@@ -5,6 +5,7 @@ https://docs.python.org/3/library/io.html
 """
 from io import BytesIO
 import os
+from collections import namedtuple, Sequence
 import time
 import logging
 
@@ -168,6 +169,36 @@ def load_json(json_stream):
     schema = AnnotationsSchema()
     result = schema.loads(json_stream.read())
     return result.data
+
+
+def json_to_object(name, json_node):
+    """Quick-and-dirty recursive conversion from JSON dictionary data to
+    an object built out of namedtuples.
+
+    https://docs.python.org/2/library/collections.html#collections.namedtuple
+
+    >>> json_to_object('x', 2)
+    2
+    >>> json_to_object('basic', {'x': 1, 'y': 2})
+    basic(x=1, y=2)
+    >>> z = json_to_object('nested', {'lst': [1, 2], 'obj': {'x': 1, 'y': 2}})
+    >>> z.lst
+    [1, 2]
+    >>> z.obj.x
+    1
+    >>> z.obj.y
+    2
+    """
+    if isinstance(json_node, dict):
+        result_type = namedtuple(name, json_node.keys())
+        obj_dict = {
+            key: json_to_object(key, value)
+            for key, value in json_node.items()
+        }
+        return result_type(**obj_dict)
+    if isinstance(json_node, Sequence):
+        return [json_to_object(name, i) for i in json_node]
+    return json_node
 
 
 def download_json(json_uri):
