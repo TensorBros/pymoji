@@ -5,6 +5,7 @@ from flask_script import Manager
 
 from pymoji.app import APP
 from pymoji.faces import process_path
+from pymoji.iris_estimator import main as iris_main
 from pymoji.utils import process_folder, shell
 
 
@@ -19,6 +20,12 @@ def build():
     """
     test()
     lint()
+
+
+@MANAGER.command
+def iris():
+    """https://www.tensorflow.org/get_started/estimator"""
+    iris_main()
 
 
 @MANAGER.command
