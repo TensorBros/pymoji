@@ -343,3 +343,21 @@ def highlight_faces(input_stream, faces, output_stream):
         draw.line(box + [box[0]], width=5, fill='#00ff00')
     output_image.save(output_stream)
     output_image.close()
+
+
+def extract_head(input_stream, face, code):
+    """Copies a head image from the given image using the given face and emoji
+    metadata.
+
+    Args:
+        input_stream: input file-object containing the head to hunt
+        face: Google Vision API metadata object
+        code: emoji code string
+
+    Returns:
+        a PIL.Image with a freshly decapitated head
+    """
+    image = Image.open(input_stream)
+    head_box = get_emoji_box(face, code=code)
+    head_image = image.crop(head_box)
+    return head_image

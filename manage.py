@@ -5,6 +5,7 @@ from flask_script import Manager
 
 from pymoji.app import APP
 from pymoji.faces import process_path
+from pymoji.tensors import load_all_heads, save_dataset
 from pymoji.utils import process_folder, shell
 
 
@@ -49,6 +50,18 @@ def rundir(directory_path):
 
 
 @MANAGER.command
+def makedata(directory_path): # pylint: disable=invalid-name
+    """Processes previous runs in the given directory, converting them into
+    a dataset of tensors and saving to the default dataset location.
+
+    Args:
+        directory_path: path to a directory to process runs in.
+    """
+    features, labels = load_all_heads(directory_path)
+    save_dataset(features, labels)
+
+
+@MANAGER.command
 def test():
     """Runs all project tests!"""
     shell("pytest --doctest-modules")
@@ -59,6 +72,7 @@ def test():
 def install():
     """Installs all project dependencies"""
     shell("pip install -r requirements.txt")
+
 
 if __name__ == "__main__":
     MANAGER.run()
